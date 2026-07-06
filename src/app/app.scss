@@ -1,0 +1,27 @@
+::ng-deep {
+  .p-fileupload {
+    border-radius: 6px;
+  }
+
+  .p-fileupload-header {
+    gap: 0.5rem;
+    border-color: #e2e8f0;
+    background: #ffffff;
+  }
+
+  .p-fileupload-content {
+    border-color: #e2e8f0;
+  }
+
+  .p-button {
+    border-radius: 6px;
+  }
+
+  .p-datatable-thead > tr > th {
+    background: #f8fafc;
+    color: #475569;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+}

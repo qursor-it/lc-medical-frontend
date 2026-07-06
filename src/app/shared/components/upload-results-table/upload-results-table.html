@@ -1,0 +1,38 @@
+<section class="overflow-hidden rounded-md border border-slate-200 bg-white shadow-sm">
+  <div class="flex items-center justify-between border-b border-slate-200 bg-slate-50 px-4 py-3">
+    <h3 class="text-sm font-semibold text-slate-800">{{ title() }}</h3>
+    <span class="text-xs text-slate-500">{{ results().length }} file</span>
+  </div>
+
+  @if (results().length > 0) {
+    <p-table [value]="results()" styleClass="text-sm" [tableStyle]="{ 'min-width': '38rem' }">
+      <ng-template pTemplate="header">
+        <tr>
+          <th>File</th>
+          <th>Esito</th>
+          <th>Documento</th>
+          <th>Dettaglio</th>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="body" let-result>
+        <tr>
+          <td class="font-medium text-slate-800">{{ result.fileName }}</td>
+          <td>
+            <p-tag
+              [severity]="result.success ? 'success' : 'danger'"
+              [value]="result.success ? 'Salvato' : 'Errore'"
+            />
+          </td>
+          <td>{{ documentLabel(result) }}</td>
+          <td class="max-w-64 truncate" [title]="result.error || documentDetail(result)">
+            {{ result.error || documentDetail(result) }}
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+  } @else {
+    <div class="px-4 py-8 text-center text-sm text-slate-500">
+      Nessun invio eseguito.
+    </div>
+  }
+</section>

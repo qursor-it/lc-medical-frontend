@@ -1,0 +1,42 @@
+<article class="rounded-md border border-slate-200 bg-white shadow-sm">
+  <div class="border-b border-slate-200 px-5 py-4">
+    <div class="flex items-center justify-between gap-4">
+      <div>
+        <h2 class="text-lg font-semibold text-slate-950">{{ config().title }}</h2>
+        <p class="mt-1 text-sm text-slate-500">
+          Invia PDF verso <span class="font-mono">{{ config().endpointLabel }}</span>
+        </p>
+      </div>
+      @if (uploading()) {
+        <p-tag severity="info" value="Invio in corso" />
+      }
+    </div>
+  </div>
+
+  <div class="p-5">
+    <p-fileupload
+      name="file"
+      accept="application/pdf"
+      invalidFileTypeMessageSummary="{0}: formato non valido"
+      invalidFileTypeMessageDetail="Carica solo PDF."
+      [chooseLabel]="config().chooseLabel"
+      [uploadLabel]="config().uploadLabel"
+      cancelLabel="Svuota"
+      [customUpload]="true"
+      [disabled]="uploading()"
+      [maxFileSize]="20_000_000"
+      [multiple]="true"
+      (uploadHandler)="handleUpload($event)"
+    >
+      <ng-template #empty>
+        <div class="flex min-h-36 flex-col items-center justify-center gap-3 rounded-md border border-dashed border-slate-300 bg-slate-50 px-4 py-8 text-center">
+          <i class="pi text-3xl" [class]="config().icon + ' ' + config().iconClass"></i>
+          <div>
+            <p class="font-medium text-slate-800">{{ config().emptyTitle }}</p>
+            <p class="mt-1 text-sm text-slate-500">{{ config().emptyDescription }}</p>
+          </div>
+        </div>
+      </ng-template>
+    </p-fileupload>
+  </div>
+</article>

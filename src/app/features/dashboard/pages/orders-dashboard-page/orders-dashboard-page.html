@@ -1,0 +1,81 @@
+<section class="border-b border-slate-200 bg-white">
+  <div class="mx-auto flex w-full max-w-7xl flex-col gap-4 px-5 py-6 md:flex-row md:items-end md:justify-between lg:px-8">
+    <div class="space-y-2">
+      <p class="text-sm font-semibold uppercase tracking-[0.08em] text-teal-700">Dashboard</p>
+      <h1 class="text-3xl font-semibold leading-tight text-slate-950 md:text-4xl">
+        Ordini
+      </h1>
+      <p class="max-w-3xl text-sm leading-6 text-slate-600 md:text-base">
+        Monitoraggio degli ordini importati, stato pagamento e invoice collegate.
+      </p>
+    </div>
+
+    <button
+      pButton
+      type="button"
+      icon="pi pi-refresh"
+      label="Aggiorna"
+      severity="secondary"
+      [loading]="loading()"
+      (click)="loadOrders()"
+    ></button>
+  </div>
+</section>
+
+<section class="mx-auto w-full max-w-7xl px-5 py-6 lg:px-8">
+  <div class="overflow-hidden rounded-md border border-slate-200 bg-white shadow-sm">
+    <p-table
+      [value]="orders()"
+      [loading]="loading()"
+      styleClass="text-sm"
+      [tableStyle]="{ 'min-width': '58rem' }"
+    >
+      <ng-template pTemplate="header">
+        <tr>
+          <th>Ordine</th>
+          <th>Cliente</th>
+          <th>Paziente</th>
+          <th>Chirurgo</th>
+          <th>Intervento</th>
+          <th>Pagamento</th>
+          <th>Invoice</th>
+          <th class="text-right">Totale</th>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="body" let-row>
+        <tr>
+          <td class="font-semibold text-slate-900">{{ row.order.orderNumber }}</td>
+          <td>{{ row.order.clientCode || '-' }}</td>
+          <td>{{ row.order.patient || '-' }}</td>
+          <td>{{ row.order.surgeon || '-' }}</td>
+          <td>{{ row.order.surgeryDate || '-' }}</td>
+          <td>
+            <p-tag
+              [severity]="row.paid ? 'success' : 'warn'"
+              [value]="row.paid ? 'Pagato' : 'Non pagato'"
+            />
+          </td>
+          <td>{{ firstInvoiceNumber(row) }}</td>
+          <td class="text-right">{{ invoiceTotal(row) }}</td>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="emptymessage">
+        <tr>
+          <td colspan="8" class="py-10 text-center text-sm text-slate-500">
+            Nessun ordine disponibile.
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+
+    <div class="border-t border-slate-200">
+      <p-paginator
+        [first]="page() * size()"
+        [rows]="size()"
+        [totalRecords]="totalItems()"
+        [rowsPerPageOptions]="[10, 20, 50]"
+        (onPageChange)="onPageChange($event)"
+      />
+    </div>
+  </div>
+</section>

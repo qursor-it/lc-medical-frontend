@@ -1,0 +1,42 @@
+<p-toast />
+
+<div class="min-h-screen bg-[#f7f8fb] lg:grid lg:grid-cols-[17rem_minmax(0,1fr)]">
+  <aside class="border-b border-slate-200 bg-white lg:min-h-screen lg:border-b-0 lg:border-r">
+    <div class="flex h-16 items-center justify-between px-5 lg:h-20">
+      <a routerLink="/dashboard" class="text-sm font-semibold uppercase tracking-[0.08em] text-slate-950">
+        LC Medical
+      </a>
+    </div>
+
+    <nav class="flex gap-2 overflow-x-auto px-3 pb-3 lg:flex-col lg:overflow-visible lg:px-4">
+      <a
+        routerLink="/dashboard"
+        routerLinkActive="bg-slate-900 text-white"
+        class="flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-100"
+      >
+        <i class="pi pi-chart-line"></i>
+        Dashboard
+      </a>
+      <a
+        routerLink="/uploads/orders"
+        routerLinkActive="bg-slate-900 text-white"
+        class="flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-100"
+      >
+        <i class="pi pi-file-pdf"></i>
+        Upload ordini
+      </a>
+      <a
+        routerLink="/uploads/invoices"
+        routerLinkActive="bg-slate-900 text-white"
+        class="flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-100"
+      >
+        <i class="pi pi-receipt"></i>
+        Upload invoice
+      </a>
+    </nav>
+  </aside>
+
+  <main class="min-w-0">
+    <router-outlet />
+  </main>
+</div>
