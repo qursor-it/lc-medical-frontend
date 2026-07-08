@@ -8,6 +8,13 @@ export interface PageResponse<T> {
   hasPrevious: boolean;
 }
 
+export interface OrderListItem {
+  id: number;
+  orderNumber: string;
+  clientCode: string | null;
+  paid: boolean;
+}
+
 export interface OrderPaymentStatusResponse {
   order: OrderSummary;
   paid: boolean;

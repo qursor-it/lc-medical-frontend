@@ -1,7 +1,7 @@
 import { Component, input, output } from '@angular/core';
 import { FileUploadModule } from 'primeng/fileupload';
 import { TagModule } from 'primeng/tag';
-import type { FileUploadHandlerEvent } from 'primeng/types/fileupload';
+import type { FileRemoveEvent, FileSelectEvent } from 'primeng/types/fileupload';
 
 import { UploadPanelConfig } from '../../../core/models/upload.models';
 
@@ -12,10 +12,19 @@ import { UploadPanelConfig } from '../../../core/models/upload.models';
 })
 export class DocumentUploadPanel {
   readonly config = input.required<UploadPanelConfig>();
+  readonly files = input<File[]>([]);
   readonly uploading = input(false);
-  readonly uploadRequested = output<File[]>();
+  readonly selectedFilesChanged = output<File[]>();
 
-  protected handleUpload(event: FileUploadHandlerEvent): void {
-    this.uploadRequested.emit(event.files);
+  protected handleSelect(event: FileSelectEvent): void {
+    this.selectedFilesChanged.emit(event.currentFiles);
+  }
+
+  protected handleRemove(event: FileRemoveEvent): void {
+    this.selectedFilesChanged.emit(this.files().filter((file) => file !== event.file));
+  }
+
+  protected handleClear(): void {
+    this.selectedFilesChanged.emit([]);
   }
 }

@@ -2,17 +2,26 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 
-import { OrderPaymentStatusResponse, PageResponse } from '../models/order.models';
+import { OrderListItem, OrderPaymentStatusResponse, PageResponse } from '../models/order.models';
 
 @Injectable({ providedIn: 'root' })
 export class OrdersService {
   private readonly http = inject(HttpClient);
 
-  getOrders(page: number, size: number): Observable<PageResponse<OrderPaymentStatusResponse>> {
-    const params = new HttpParams()
+  getOrders(page: number, size: number, search = '', deepSearch = false): Observable<PageResponse<OrderListItem>> {
+    let params = new HttpParams()
       .set('page', page)
-      .set('size', size);
+      .set('size', size)
+      .set('deepSearch', deepSearch);
 
-    return this.http.get<PageResponse<OrderPaymentStatusResponse>>('/api/orders', { params });
+    if (search.trim().length > 0) {
+      params = params.set('search', search.trim());
+    }
+
+    return this.http.get<PageResponse<OrderListItem>>('/api/orders', { params });
+  }
+
+  getOrderDetail(id: number): Observable<OrderPaymentStatusResponse> {
+    return this.http.get<OrderPaymentStatusResponse>(`/api/orders/${id}`);
   }
 }

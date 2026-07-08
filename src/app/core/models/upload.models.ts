@@ -7,6 +7,18 @@ export interface BatchUploadResult<T = Record<string, unknown>> {
   error: string | null;
 }
 
+export type UploadQueueStatus = 'pending' | 'uploading' | 'success' | 'failed';
+
+export interface UploadQueueItem<T = Record<string, unknown>> {
+  id: string;
+  file: File;
+  fileName: string;
+  size: number;
+  status: UploadQueueStatus;
+  result: BatchUploadResult<T> | null;
+  error: string | null;
+}
+
 export interface UploadPanelConfig {
   kind: UploadKind;
   title: string;

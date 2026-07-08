@@ -4,7 +4,12 @@ import { ActivatedRoute } from '@angular/router';
 import { MessageService } from 'primeng/api';
 
 import { uploadPanelConfigs } from '../../../../core/document-upload.config';
-import { BatchUploadResult, UploadKind, UploadPanelConfig } from '../../../../core/models/upload.models';
+import {
+  BatchUploadResult,
+  UploadKind,
+  UploadPanelConfig,
+  UploadQueueItem,
+} from '../../../../core/models/upload.models';
 import { DocumentUploadService } from '../../../../core/services/document-upload.service';
 import { DocumentUploadPanel } from '../../../../shared/components/document-upload-panel/document-upload-panel';
 import { UploadResultsTable } from '../../../../shared/components/upload-results-table/upload-results-table';
@@ -19,23 +24,54 @@ export class UploadsPage {
   private readonly uploadService = inject(DocumentUploadService);
   private readonly messages = inject(MessageService);
 
-  protected readonly results = signal<BatchUploadResult[]>([]);
+  protected readonly uploadQueue = signal<UploadQueueItem[]>([]);
   protected readonly uploading = signal(false);
   protected readonly kind = signal<UploadKind>(this.route.snapshot.data['kind'] as UploadKind);
 
   protected readonly config = computed<UploadPanelConfig>(() => uploadPanelConfigs[this.kind()]);
+  protected readonly selectedFiles = computed(() => this.uploadQueue().map((item) => item.file));
   protected readonly successfulUploads = computed(() =>
-    this.results().filter((result) => result.success).length,
+    this.uploadQueue().filter((item) => item.status === 'success').length,
   );
   protected readonly failedUploads = computed(() =>
-    this.results().filter((result) => !result.success).length,
+    this.uploadQueue().filter((item) => item.status === 'failed').length,
   );
 
   constructor() {
     this.route.data.subscribe((data) => {
       this.kind.set(data['kind'] as UploadKind);
-      this.results.set([]);
+      this.uploadQueue.set([]);
     });
+  }
+
+  protected updateSelectedFiles(files: File[]): void {
+    const previousItems = new Map(this.uploadQueue().map((item) => [this.fileKey(item.file), item]));
+
+    this.uploadQueue.set(
+      files.map((file): UploadQueueItem => {
+        const previous = previousItems.get(this.fileKey(file));
+
+        return (
+          previous ?? {
+            id: this.fileKey(file),
+            file,
+            fileName: file.name,
+            size: file.size,
+            status: 'pending',
+            result: null,
+            error: null,
+          }
+        );
+      }),
+    );
+  }
+
+  protected clearSelectedFiles(): void {
+    this.uploadQueue.set([]);
+  }
+
+  protected uploadSelectedFiles(): void {
+    this.upload(this.selectedFiles());
   }
 
   protected upload(files: File[]): void {
@@ -49,10 +85,19 @@ export class UploadsPage {
     }
 
     this.uploading.set(true);
+    this.uploadQueue.update((items) =>
+      items.map(
+        (item): UploadQueueItem => ({
+          ...item,
+          status: files.some((file) => this.fileKey(file) === item.id) ? 'uploading' : item.status,
+          error: null,
+        }),
+      ),
+    );
 
     this.uploadService.uploadBatch(this.kind(), files).subscribe({
       next: (response) => {
-        this.results.set(response);
+        this.applyUploadResults(response);
         const successCount = response.filter((result) => result.success).length;
         const failureCount = response.length - successCount;
 
@@ -63,15 +108,60 @@ export class UploadsPage {
         });
       },
       error: (error: HttpErrorResponse) => {
-        this.results.set([]);
+        const message = this.errorMessage(error);
+        this.uploadQueue.update((items) =>
+          items.map(
+            (item): UploadQueueItem => ({
+              ...item,
+              status: item.status === 'uploading' ? 'failed' : item.status,
+              error: item.status === 'uploading' ? message : item.error,
+              result: item.status === 'uploading' ? null : item.result,
+            }),
+          ),
+        );
         this.messages.add({
           severity: 'error',
           summary: 'Upload non riuscito',
-          detail: this.errorMessage(error),
+          detail: message,
         });
       },
       complete: () => this.uploading.set(false),
     });
+  }
+
+  private applyUploadResults(results: BatchUploadResult[]): void {
+    const remainingResults = [...results];
+
+    this.uploadQueue.update((items) =>
+      items.map((item): UploadQueueItem => {
+        if (item.status !== 'uploading') {
+          return item;
+        }
+
+        const resultIndex = remainingResults.findIndex((result) => result.fileName === item.fileName);
+        const result = resultIndex >= 0 ? remainingResults.splice(resultIndex, 1)[0] : null;
+
+        if (!result) {
+          return {
+            ...item,
+            status: 'failed',
+            result: null,
+            error: 'Il backend non ha restituito un esito per questo file.',
+          };
+        }
+
+        return {
+          ...item,
+          status: result.success ? 'success' : 'failed',
+          result,
+          error: result.error,
+        };
+      }),
+    );
+  }
+
+  private fileKey(file: File): string {
+    return `${file.name}-${file.size}-${file.lastModified}`;
   }
 
   private errorMessage(error: HttpErrorResponse): string {

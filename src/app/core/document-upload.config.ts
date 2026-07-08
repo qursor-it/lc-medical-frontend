@@ -4,7 +4,7 @@ export const uploadPanelConfigs: Record<UploadKind, UploadPanelConfig> = {
   orders: {
     kind: 'orders',
     title: 'Ordini',
-    endpointLabel: '/orders/extract-text/batch',
+    endpointLabel: '/orders/ingest/batch',
     chooseLabel: 'Seleziona PDF',
     uploadLabel: 'Invia ordini',
     emptyTitle: 'Trascina qui i PDF degli ordini',
@@ -15,7 +15,7 @@ export const uploadPanelConfigs: Record<UploadKind, UploadPanelConfig> = {
   invoices: {
     kind: 'invoices',
     title: 'Invoice',
-    endpointLabel: '/invoices/extract-text/batch',
+    endpointLabel: '/invoices/ingest/batch',
     chooseLabel: 'Seleziona PDF',
     uploadLabel: 'Invia invoice',
     emptyTitle: 'Trascina qui i PDF invoice',

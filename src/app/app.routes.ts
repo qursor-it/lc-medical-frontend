@@ -14,6 +14,20 @@ export const routes: Routes = [
       ),
   },
   {
+    path: 'orders',
+    loadComponent: () =>
+      import('./features/orders/pages/orders-list-page/orders-list-page').then(
+        (m) => m.OrdersListPage,
+      ),
+  },
+  {
+    path: 'invoices',
+    loadComponent: () =>
+      import('./features/invoices/pages/invoices-list-page/invoices-list-page').then(
+        (m) => m.InvoicesListPage,
+      ),
+  },
+  {
     path: 'uploads/orders',
     data: { kind: 'orders' },
     loadComponent: () =>

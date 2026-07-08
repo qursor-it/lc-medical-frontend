@@ -11,27 +11,43 @@
     <nav class="flex gap-2 overflow-x-auto px-3 pb-3 lg:flex-col lg:overflow-visible lg:px-4">
       <a
         routerLink="/dashboard"
-        routerLinkActive="bg-slate-900 text-white"
-        class="flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-100"
+        routerLinkActive="bg-slate-900 text-white hover:bg-slate-900 hover:text-white"
+        class="flex min-h-10 items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-100 hover:text-slate-950 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900"
       >
         <i class="pi pi-chart-line"></i>
-        Dashboard
+        <span>Dashboard</span>
+      </a>
+      <a
+        routerLink="/orders"
+        routerLinkActive="bg-slate-900 text-white hover:bg-slate-900 hover:text-white"
+        class="flex min-h-10 items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-100 hover:text-slate-950 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900"
+      >
+        <i class="pi pi-list"></i>
+        <span>Lista ordini</span>
+      </a>
+      <a
+        routerLink="/invoices"
+        routerLinkActive="bg-slate-900 text-white hover:bg-slate-900 hover:text-white"
+        class="flex min-h-10 items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-100 hover:text-slate-950 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900"
+      >
+        <i class="pi pi-table"></i>
+        <span>Lista fatture</span>
       </a>
       <a
         routerLink="/uploads/orders"
-        routerLinkActive="bg-slate-900 text-white"
-        class="flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-100"
+        routerLinkActive="bg-slate-900 text-white hover:bg-slate-900 hover:text-white"
+        class="flex min-h-10 items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-100 hover:text-slate-950 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900"
       >
         <i class="pi pi-file-pdf"></i>
-        Upload ordini
+        <span>Upload ordini</span>
       </a>
       <a
         routerLink="/uploads/invoices"
-        routerLinkActive="bg-slate-900 text-white"
-        class="flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-100"
+        routerLinkActive="bg-slate-900 text-white hover:bg-slate-900 hover:text-white"
+        class="flex min-h-10 items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-100 hover:text-slate-950 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900"
       >
         <i class="pi pi-receipt"></i>
-        Upload invoice
+        <span>Upload invoice</span>
       </a>
     </nav>
   </aside>

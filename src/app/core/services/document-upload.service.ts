@@ -12,6 +12,6 @@ export class DocumentUploadService {
     const formData = new FormData();
     files.forEach((file) => formData.append('file', file, file.name));
 
-    return this.http.post<BatchUploadResult[]>(`/api/${kind}/extract-text/batch`, formData);
+    return this.http.post<BatchUploadResult[]>(`/api/${kind}/ingest/batch`, formData);
   }
 }

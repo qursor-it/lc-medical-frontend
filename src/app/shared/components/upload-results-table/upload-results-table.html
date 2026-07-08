@@ -1,38 +1,61 @@
 <section class="overflow-hidden rounded-md border border-slate-200 bg-white shadow-sm">
   <div class="flex items-center justify-between border-b border-slate-200 bg-slate-50 px-4 py-3">
     <h3 class="text-sm font-semibold text-slate-800">{{ title() }}</h3>
-    <span class="text-xs text-slate-500">{{ results().length }} file</span>
+    <span class="text-xs text-slate-500">{{ items().length }} file</span>
   </div>
 
-  @if (results().length > 0) {
-    <p-table [value]="results()" styleClass="text-sm" [tableStyle]="{ 'min-width': '38rem' }">
+  @if (items().length > 0) {
+    <p-table [value]="items()" styleClass="text-sm" [tableStyle]="{ 'min-width': '52rem' }">
       <ng-template pTemplate="header">
         <tr>
           <th>File</th>
-          <th>Esito</th>
+          <th>Dimensione</th>
+          <th>Stato</th>
           <th>Documento</th>
           <th>Dettaglio</th>
         </tr>
       </ng-template>
-      <ng-template pTemplate="body" let-result>
+      <ng-template pTemplate="body" let-item>
         <tr>
-          <td class="font-medium text-slate-800">{{ result.fileName }}</td>
+          <td class="font-medium text-slate-800">{{ item.fileName }}</td>
+          <td class="text-slate-600">{{ fileSize(item.size) }}</td>
           <td>
             <p-tag
-              [severity]="result.success ? 'success' : 'danger'"
-              [value]="result.success ? 'Salvato' : 'Errore'"
+              [severity]="statusSeverity(item.status)"
+              [value]="statusLabel(item.status)"
             />
           </td>
-          <td>{{ documentLabel(result) }}</td>
-          <td class="max-w-64 truncate" [title]="result.error || documentDetail(result)">
-            {{ result.error || documentDetail(result) }}
+          <td>{{ documentLabel(item) }}</td>
+          <td class="max-w-96 truncate" [title]="documentDetail(item)">
+            {{ documentDetail(item) }}
           </td>
         </tr>
       </ng-template>
     </p-table>
   } @else {
     <div class="px-4 py-8 text-center text-sm text-slate-500">
-      Nessun invio eseguito.
+      Nessun file selezionato.
     </div>
   }
+
+  <div class="flex flex-col gap-2 border-t border-slate-200 bg-white px-4 py-3 sm:flex-row sm:items-center sm:justify-end">
+    <button
+      pButton
+      type="button"
+      icon="pi pi-trash"
+      label="Svuota"
+      severity="secondary"
+      [disabled]="!hasFiles() || uploading()"
+      (click)="clearRequested.emit()"
+    ></button>
+    <button
+      pButton
+      type="button"
+      icon="pi pi-upload"
+      label="Invia"
+      [disabled]="!hasFiles()"
+      [loading]="uploading()"
+      (click)="uploadRequested.emit()"
+    ></button>
+  </div>
 </section>

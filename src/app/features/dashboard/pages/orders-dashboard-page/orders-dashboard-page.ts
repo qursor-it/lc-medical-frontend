@@ -1,28 +1,33 @@
 import { HttpErrorResponse } from '@angular/common/http';
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { Component, computed, inject, OnInit, signal } from '@angular/core';
+import { RouterLink } from '@angular/router';
 import { MessageService } from 'primeng/api';
 import { ButtonModule } from 'primeng/button';
-import { PaginatorModule, PaginatorState } from 'primeng/paginator';
-import { TableModule } from 'primeng/table';
 import { TagModule } from 'primeng/tag';
+import { finalize } from 'rxjs';
 
-import { OrderPaymentStatusResponse } from '../../../../core/models/order.models';
+import { OrderListItem, PageResponse } from '../../../../core/models/order.models';
 import { OrdersService } from '../../../../core/services/orders.service';
 
 @Component({
   selector: 'app-orders-dashboard-page',
-  imports: [ButtonModule, PaginatorModule, TableModule, TagModule],
+  imports: [ButtonModule, RouterLink, TagModule],
   templateUrl: './orders-dashboard-page.html',
 })
 export class OrdersDashboardPage implements OnInit {
   private readonly ordersService = inject(OrdersService);
   private readonly messages = inject(MessageService);
 
-  protected readonly orders = signal<OrderPaymentStatusResponse[]>([]);
+  protected readonly orders = signal<OrderListItem[]>([]);
   protected readonly loading = signal(false);
-  protected readonly page = signal(0);
-  protected readonly size = signal(10);
+  protected readonly size = signal(100);
   protected readonly totalItems = signal(0);
+  protected readonly loadedItems = computed(() => this.orders().length);
+  protected readonly paidOrders = computed(() => this.orders().filter((order) => order.paid).length);
+  protected readonly unpaidOrders = computed(() => this.orders().filter((order) => !order.paid).length);
+  protected readonly paidPercentage = computed(() => this.percentage(this.paidOrders(), this.loadedItems()));
+  protected readonly unpaidPercentage = computed(() => this.percentage(this.unpaidOrders(), this.loadedItems()));
+  protected readonly unpaidOrdersPreview = computed(() => this.orders().filter((order) => !order.paid).slice(0, 5));
 
   ngOnInit(): void {
     this.loadOrders();
@@ -31,45 +36,41 @@ export class OrdersDashboardPage implements OnInit {
   protected loadOrders(): void {
     this.loading.set(true);
 
-    this.ordersService.getOrders(this.page(), this.size()).subscribe({
-      next: (response) => {
-        this.orders.set(response.items);
-        this.page.set(response.page);
-        this.size.set(response.size);
-        this.totalItems.set(response.totalItems);
-      },
-      error: (error: HttpErrorResponse) => {
-        this.orders.set([]);
-        this.messages.add({
-          severity: 'error',
-          summary: 'Ordini non caricati',
-          detail: this.errorMessage(error),
-        });
-      },
-      complete: () => this.loading.set(false),
-    });
+    this.ordersService
+      .getOrders(0, this.size())
+      .pipe(finalize(() => this.loading.set(false)))
+      .subscribe({
+        next: (response) => {
+          this.applyPageResponse(response);
+        },
+        error: (error: HttpErrorResponse) => {
+          if (error.status === 404) {
+            this.applyPageResponse(null);
+            return;
+          }
+
+          this.applyPageResponse(null);
+          this.messages.add({
+            severity: 'error',
+            summary: 'Ordini non caricati',
+            detail: this.errorMessage(error),
+          });
+        },
+      });
   }
 
-  protected onPageChange(event: PaginatorState): void {
-    this.page.set(event.page ?? 0);
-    this.size.set(event.rows ?? this.size());
-    this.loadOrders();
+  private applyPageResponse(response: PageResponse<OrderListItem> | null): void {
+    this.orders.set(response?.items ?? []);
+    this.size.set(response?.size ?? this.size());
+    this.totalItems.set(response?.totalItems ?? 0);
   }
 
-  protected firstInvoiceNumber(order: OrderPaymentStatusResponse): string {
-    return order.invoices[0]?.invoiceNumber ?? '-';
-  }
-
-  protected invoiceTotal(order: OrderPaymentStatusResponse): string {
-    const total = order.invoices[0]?.total;
-    if (total == null) {
-      return '-';
+  private percentage(value: number, total: number): number {
+    if (total === 0) {
+      return 0;
     }
 
-    return new Intl.NumberFormat('it-IT', {
-      style: 'currency',
-      currency: 'EUR',
-    }).format(total);
+    return Math.round((value / total) * 100);
   }
 
   private errorMessage(error: HttpErrorResponse): string {
