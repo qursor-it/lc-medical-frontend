@@ -126,7 +126,7 @@
 
     <p-table
       [value]="loading() ? skeletonRows : payments()"
-      styleClass="data-table pretty-table text-sm"
+      styleClass="data-table pretty-table mobile-card-table text-sm"
       [tableStyle]="{ 'min-width': '72rem' }"
     >
       <ng-template pTemplate="header">
@@ -155,7 +155,7 @@
           </tr>
         } @else {
           <tr class="transition-colors hover:bg-slate-50">
-            <td>
+            <td class="mobile-card-primary">
               <div class="flex min-w-0 items-center gap-3">
                 <div
                   class="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-emerald-50 text-emerald-700"
@@ -172,7 +172,7 @@
                 </div>
               </div>
             </td>
-            <td>
+            <td data-label="Documento">
               <div class="min-w-0">
                 <span
                   class="cell-clip font-medium text-slate-900"
@@ -183,7 +183,7 @@
                 <span class="mt-0.5 block text-xs text-slate-500">{{ row.docType || '-' }}</span>
               </div>
             </td>
-            <td>
+            <td data-label="Cliente">
               <div class="min-w-0">
                 <span
                   class="cell-clip font-medium text-slate-900"
@@ -196,7 +196,7 @@
                 }}</span>
               </div>
             </td>
-            <td>
+            <td data-label="Articolo">
               <div class="min-w-0">
                 <span class="cell-clip font-semibold text-slate-900" [title]="row.itemCode || '-'">
                   {{ row.itemCode || '-' }}
@@ -209,7 +209,7 @@
                 </span>
               </div>
             </td>
-            <td>
+            <td data-label="Seriale">
               <span
                 class="inline-flex max-w-full items-center rounded-md bg-slate-100 px-2 py-1 text-xs font-semibold text-slate-700"
                 [title]="row.manufacturerSerial || '-'"
@@ -217,11 +217,13 @@
                 <span class="cell-clip">{{ row.manufacturerSerial || '-' }}</span>
               </span>
             </td>
-            <td class="text-right font-medium text-slate-900">{{ formatNumber(row.quantity) }}</td>
-            <td class="text-right font-semibold text-slate-950">
+            <td data-label="Qta" class="text-right font-medium text-slate-900">
+              {{ formatNumber(row.quantity) }}
+            </td>
+            <td data-label="Importo" class="text-right font-semibold text-slate-950">
               {{ formatCurrency(row.lineTotal) }}
             </td>
-            <td>
+            <td data-label="Data">
               <div class="min-w-0">
                 <span class="font-medium text-slate-900">{{ row.postingDate || '-' }}</span>
                 <span class="mt-0.5 block text-xs text-slate-500">{{

@@ -1,5 +1,7 @@
 <section class="border-b border-slate-200 bg-white">
-  <div class="mx-auto flex w-full max-w-7xl items-center justify-between gap-3 px-5 py-3 lg:px-8">
+  <div
+    class="mx-auto flex w-full max-w-7xl flex-col gap-3 px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-5 lg:px-8"
+  >
     <div>
       <h1 class="text-xl font-semibold leading-tight text-slate-950">Utenti</h1>
       <p class="mt-0.5 text-sm text-slate-500">{{ users().length }} account</p>
@@ -95,7 +97,7 @@
 
     <p-table
       [value]="users()"
-      styleClass="data-table pretty-table text-sm"
+      styleClass="data-table pretty-table mobile-card-table text-sm"
       [tableStyle]="{ 'min-width': '48rem' }"
     >
       <ng-template pTemplate="header">
@@ -108,13 +110,13 @@
       </ng-template>
       <ng-template pTemplate="body" let-user>
         <tr>
-          <td>
+          <td class="mobile-card-primary">
             <div class="min-w-0">
               <p class="cell-clip font-semibold text-slate-950">{{ user.fullName }}</p>
               <p class="cell-clip text-xs text-slate-500">{{ user.email }}</p>
             </div>
           </td>
-          <td>
+          <td data-label="Ruolo">
             <select
               class="h-9 rounded-md border border-slate-300 bg-white px-2 text-sm outline-none transition focus:border-teal-600 focus:ring-2 focus:ring-teal-100"
               [value]="user.role"
@@ -124,13 +126,13 @@
               <option value="ADMIN">Admin</option>
             </select>
           </td>
-          <td>
+          <td data-label="Stato">
             <p-tag
               [severity]="user.active ? 'success' : 'secondary'"
               [value]="user.active ? 'Attivo' : 'Disattivo'"
             />
           </td>
-          <td class="text-right">
+          <td data-label="Azioni" class="mobile-card-actions text-right">
             <button
               pButton
               type="button"

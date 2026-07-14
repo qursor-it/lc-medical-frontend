@@ -1,5 +1,5 @@
-@import "tailwindcss";
-@import "primeicons/primeicons.css";
+@import 'tailwindcss';
+@import 'primeicons/primeicons.css';
 
 html,
 body {
@@ -10,7 +10,14 @@ body {
   margin: 0;
   background: #f4f7f7;
   color: #102a2a;
-  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-family:
+    Inter,
+    ui-sans-serif,
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    'Segoe UI',
+    sans-serif;
   -webkit-font-smoothing: antialiased;
 }
 
@@ -23,16 +30,121 @@ body {
   color: #134e4a;
 }
 
-@media (max-width: 480px) {
-  .nav-label {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    padding: 0;
-    margin: -1px;
+@media (max-width: 767px) {
+  .mobile-card-table .p-datatable-wrapper {
+    overflow: visible;
+  }
+
+  .mobile-card-table .p-datatable-table,
+  .mobile-card-table .p-datatable-thead,
+  .mobile-card-table .p-datatable-tbody,
+  .mobile-card-table .p-datatable-tbody > tr,
+  .mobile-card-table .p-datatable-tbody > tr > td {
+    display: block;
+    width: 100%;
+    min-width: 0 !important;
+  }
+
+  .mobile-card-table .p-datatable-thead {
+    display: none;
+  }
+
+  .mobile-card-table .p-datatable-tbody {
+    display: grid;
+    gap: 0.75rem;
+    padding: 0.75rem;
+    background: #f8fafc;
+  }
+
+  .mobile-card-table .p-datatable-tbody > tr {
     overflow: hidden;
-    clip: rect(0, 0, 0, 0);
-    white-space: nowrap;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    background: #ffffff;
+    box-shadow: 0 1px 2px rgb(15 23 42 / 0.05);
+  }
+
+  .mobile-card-table.pretty-table .p-datatable-tbody > tr {
+    border-bottom: 1px solid #e2e8f0;
+  }
+
+  .mobile-card-table.pretty-table .p-datatable-tbody > tr:hover > td,
+  .mobile-card-table .p-datatable-tbody > tr:hover > td {
+    background: transparent;
+  }
+
+  .mobile-card-table.pretty-table .p-datatable-tbody > tr > td:first-child,
+  .mobile-card-table.pretty-table .p-datatable-tbody > tr:hover > td:first-child {
+    border-left: 0;
+  }
+
+  .mobile-card-table .p-datatable-tbody > tr > td {
     border: 0;
+    padding: 0.65rem 0.75rem;
+    white-space: normal;
+  }
+
+  .mobile-card-table .p-datatable-tbody > tr > td.mobile-card-primary {
+    border-bottom: 1px solid #e2e8f0;
+    background: #f8fafc;
+    padding: 0.85rem 0.75rem;
+  }
+
+  .mobile-card-table .p-datatable-tbody > tr > td[data-label] {
+    display: grid;
+    grid-template-columns: minmax(5.75rem, 36%) minmax(0, 1fr);
+    gap: 0.75rem;
+    align-items: start;
+  }
+
+  .mobile-card-table .p-datatable-tbody > tr > td[data-label]::before {
+    content: attr(data-label);
+    color: #64748b;
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    line-height: 1.25rem;
+    text-transform: uppercase;
+  }
+
+  .mobile-card-table .p-datatable-tbody > tr > td.mobile-card-actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 0.75rem;
+    align-items: center;
+  }
+
+  .mobile-card-table .p-datatable-tbody > tr > td.mobile-card-actions::before {
+    flex: 0 0 auto;
+  }
+
+  .mobile-card-table .mobile-card-icon {
+    display: none !important;
+  }
+
+  .mobile-card-table .p-datatable-tbody > tr > td.text-right {
+    text-align: left;
+  }
+
+  .mobile-card-table .cell-clip,
+  .mobile-card-table .truncate {
+    white-space: normal;
+    overflow-wrap: anywhere;
+    text-overflow: clip;
+  }
+
+  .mobile-card-table .skeleton-row {
+    padding: 0.75rem;
+  }
+
+  .mobile-card-table .skeleton-row > td {
+    height: auto;
+    padding: 0.45rem 0;
+  }
+
+  .p-paginator {
+    justify-content: center;
+    padding: 0.75rem 0.25rem;
   }
 }
