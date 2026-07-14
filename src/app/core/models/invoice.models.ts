@@ -29,6 +29,30 @@ export interface InvoiceDetail extends InvoiceListItem {
   lines: InvoiceLineSummary[];
 }
 
+export interface UpdateInvoiceRequest {
+  invoiceNumber: string | null;
+  invoiceType: string | null;
+  clientCode: string | null;
+  invoiceDate: string | null;
+  dueDate: string | null;
+  orderNumber: string;
+  totalWithoutDiscount: number | null;
+  discount: number | null;
+  amountExVat: number | null;
+  vat: number | null;
+  total: number | null;
+  bank: string | null;
+  iban: string | null;
+  buyerName: string | null;
+  buyerAddress: string | null;
+  buyerVat: string | null;
+  surgeon: string | null;
+  patient: string | null;
+  representative: string | null;
+  cupCode: string | null;
+  cigCode: string | null;
+}
+
 export interface InvoiceLineSummary {
   id: number;
   articolo: string | null;

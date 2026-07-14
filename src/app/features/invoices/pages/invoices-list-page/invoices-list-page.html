@@ -1,11 +1,8 @@
 <section class="border-b border-slate-200 bg-white">
-  <div class="mx-auto flex w-full max-w-7xl flex-col gap-3 px-5 py-3 md:flex-row md:items-center md:justify-between lg:px-8">
-    <div class="space-y-1">
-      <p class="text-xs font-semibold uppercase tracking-[0.08em] text-teal-700">Lista</p>
-      <h1 class="text-2xl font-semibold leading-tight text-slate-950">Fatture</h1>
-      <p class="max-w-3xl text-sm leading-5 text-slate-600">
-        Archivio fatture importate con valori economici, dati acquirente e collegamento ordine.
-      </p>
+  <div class="mx-auto flex w-full max-w-7xl items-center justify-between gap-3 px-5 py-3 lg:px-8">
+    <div>
+      <h1 class="text-xl font-semibold leading-tight text-slate-950">Fatture</h1>
+      <p class="mt-0.5 text-sm text-slate-500">{{ resultLabel() }}</p>
     </div>
 
     <button
@@ -21,52 +18,102 @@
 </section>
 
 <section class="mx-auto w-full max-w-7xl px-5 py-4 lg:px-8">
-  <div class="relative overflow-hidden rounded-md border border-slate-200 bg-white shadow-sm">
-    <div class="flex flex-col gap-2 border-b border-slate-200 bg-white px-4 py-3 lg:flex-row lg:items-center lg:justify-end">
-      <div class="flex flex-col gap-2 sm:flex-row sm:items-center">
-        <div class="relative">
-          <i class="pi pi-search absolute left-3 top-1/2 -translate-y-1/2 text-sm text-slate-400"></i>
-          <input
-            type="search"
-            class="h-10 w-full rounded-md border border-slate-300 bg-white pl-9 pr-3 text-sm text-slate-900 outline-none transition focus:border-teal-600 focus:ring-2 focus:ring-teal-100 sm:w-80"
-            placeholder="Cerca fattura, ordine, cliente..."
-            [value]="searchText()"
-            (input)="onSearchInput($event)"
-            (keydown.enter)="applySearch()"
-          />
+  <div
+    class="relative overflow-hidden rounded-md border border-slate-200 bg-white shadow-sm"
+    [attr.aria-busy]="loading()"
+  >
+    <div class="border-b border-slate-200 bg-white px-4 py-4">
+      <div class="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
+        <div class="flex flex-wrap items-center gap-2 text-sm">
+          <span class="font-semibold text-slate-900">Archivio fatture</span>
+          <span class="rounded-md bg-slate-100 px-2 py-1 text-xs font-semibold text-slate-600">{{
+            resultLabel()
+          }}</span>
+          @if (hasSearch()) {
+            <span
+              class="inline-flex min-w-0 max-w-full items-center gap-1 rounded-md border border-teal-200 bg-teal-50 px-2 py-1 text-xs font-semibold text-teal-800"
+            >
+              <i class="pi pi-filter text-[0.7rem]"></i>
+              <span class="truncate">{{ appliedSearch() }}</span>
+            </span>
+          }
+          @if (deepSearch()) {
+            <span class="rounded-md bg-amber-50 px-2 py-1 text-xs font-semibold text-amber-800"
+              >Profonda</span
+            >
+          }
         </div>
-        <button
-          pButton
-          type="button"
-          icon="pi pi-bolt"
-          [label]="deepSearch() ? 'Approfondita' : 'Solo lista'"
-          [severity]="deepSearch() ? 'warn' : 'secondary'"
-          (click)="toggleDeepSearch()"
-        ></button>
-        <button
-          pButton
-          type="button"
-          icon="pi pi-search"
-          label="Cerca"
-          [loading]="loading()"
-          (click)="applySearch()"
-        ></button>
-        <button
-          pButton
-          type="button"
-          icon="pi pi-times"
-          label="Pulisci"
-          severity="secondary"
-          [disabled]="!searchText() && !appliedSearch()"
-          (click)="clearSearch()"
-        ></button>
+        @if (loading()) {
+          <span
+            class="inline-flex items-center gap-2 rounded-md bg-teal-50 px-2 py-1 text-xs font-semibold text-teal-700"
+          >
+            <i class="pi pi-spin pi-spinner text-xs"></i>
+            Caricamento
+          </span>
+        }
+
+        <div class="flex flex-col gap-2 lg:flex-row lg:items-center lg:justify-end">
+          <label class="sr-only" for="invoices-search">Cerca fattura o cliente</label>
+          <div class="relative min-w-0 lg:w-[28rem]">
+            <i
+              class="pi pi-search absolute left-3 top-1/2 -translate-y-1/2 text-sm text-slate-400"
+            ></i>
+            <input
+              id="invoices-search"
+              type="search"
+              class="h-11 w-full rounded-md border border-slate-300 bg-slate-50 pl-9 pr-10 text-sm text-slate-900 outline-none transition focus:border-teal-600 focus:bg-white focus:ring-2 focus:ring-teal-100"
+              placeholder="Cerca fattura o cliente"
+              [value]="searchText()"
+              [disabled]="loading()"
+              (input)="onSearchInput($event)"
+              (keydown.enter)="applySearch()"
+              (keydown.escape)="clearSearch()"
+            />
+            @if (searchText() || appliedSearch()) {
+              <button
+                type="button"
+                class="absolute right-1.5 top-1/2 flex h-8 w-8 -translate-y-1/2 cursor-pointer items-center justify-center rounded-md text-slate-400 transition hover:bg-white hover:text-slate-700 focus:outline-none focus:ring-2 focus:ring-teal-100"
+                aria-label="Pulisci ricerca"
+                [disabled]="loading()"
+                (click)="clearSearch()"
+              >
+                <i class="pi pi-times text-xs"></i>
+              </button>
+            }
+          </div>
+          <button
+            pButton
+            type="button"
+            icon="pi pi-bolt"
+            [label]="deepSearch() ? 'Profonda' : 'Lista'"
+            [severity]="deepSearch() ? 'warn' : 'secondary'"
+            [disabled]="loading()"
+            (click)="toggleDeepSearch()"
+          ></button>
+          <button
+            pButton
+            type="button"
+            icon="pi pi-search"
+            label="Cerca"
+            [loading]="loading()"
+            (click)="applySearch()"
+          ></button>
+        </div>
       </div>
     </div>
 
+    @if (loading()) {
+      <div class="border-b border-slate-200 bg-slate-50 px-4 py-3">
+        <div class="h-2 overflow-hidden rounded-full bg-slate-200">
+          <div class="h-full w-1/3 animate-pulse rounded-full bg-teal-600"></div>
+        </div>
+      </div>
+    }
+
     <p-table
       [value]="loading() ? skeletonRows : invoices()"
-      styleClass="data-table text-sm"
-      [tableStyle]="{ 'min-width': '44rem' }"
+      styleClass="data-table pretty-table text-sm"
+      [tableStyle]="{ 'min-width': '58rem' }"
     >
       <ng-template pTemplate="header">
         <tr>
@@ -74,6 +121,7 @@
           <th>Ordine</th>
           <th>Cliente</th>
           <th class="text-right">Pagamento</th>
+          <th class="w-14"></th>
         </tr>
       </ng-template>
       <ng-template pTemplate="body" let-row>
@@ -83,21 +131,50 @@
             <td><span class="skeleton-line w-24"></span></td>
             <td><span class="skeleton-line w-20"></span></td>
             <td><span class="skeleton-line w-24"></span></td>
+            <td><span class="skeleton-line w-6"></span></td>
           </tr>
         } @else {
           <tr class="cursor-pointer transition-colors hover:bg-slate-50" (click)="openDetail(row)">
-            <td class="font-semibold text-slate-900">
-              <span class="cell-clip" [title]="row.invoiceNumber || '-'">{{ row.invoiceNumber || '-' }}</span>
+            <td>
+              <div class="flex min-w-0 items-center gap-3">
+                <div
+                  class="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-sky-50 text-sky-700"
+                >
+                  <i class="pi pi-receipt text-sm"></i>
+                </div>
+                <div class="min-w-0">
+                  <span
+                    class="cell-clip font-semibold text-slate-950"
+                    [title]="row.invoiceNumber || '-'"
+                    >{{ row.invoiceNumber || '-' }}</span
+                  >
+                  <span class="mt-0.5 block text-xs text-slate-500">Fattura</span>
+                </div>
+              </div>
             </td>
-            <td><span class="cell-clip" [title]="row.orderNumber || '-'">{{ row.orderNumber || '-' }}</span></td>
-            <td><span class="cell-clip" [title]="row.clientCode || '-'">{{ row.clientCode || '-' }}</span></td>
+            <td>
+              <span class="cell-clip font-medium text-slate-800" [title]="row.orderNumber || '-'">{{
+                row.orderNumber || '-'
+              }}</span>
+            </td>
+            <td>
+              <span
+                class="inline-flex max-w-full items-center rounded-md bg-slate-100 px-2 py-1 text-xs font-semibold text-slate-700"
+                [title]="row.clientCode || '-'"
+              >
+                <span class="cell-clip">{{ row.clientCode || '-' }}</span>
+              </span>
+            </td>
             <td class="text-right font-semibold text-slate-900">{{ formatCurrency(row.total) }}</td>
+            <td class="text-right text-slate-400">
+              <i class="pi pi-angle-right"></i>
+            </td>
           </tr>
         }
       </ng-template>
       <ng-template pTemplate="emptymessage">
         <tr>
-          <td colspan="4" class="py-10 text-center text-sm text-slate-500">
+          <td colspan="5" class="py-10 text-center text-sm text-slate-500">
             Nessuna fattura disponibile.
           </td>
         </tr>
@@ -106,6 +183,8 @@
 
     <div class="border-t border-slate-200">
       <p-paginator
+        [class.pointer-events-none]="loading()"
+        [class.opacity-60]="loading()"
         [first]="page() * size()"
         [rows]="size()"
         [totalRecords]="totalItems()"
@@ -118,90 +197,495 @@
 
 <p-dialog
   header="Dettaglio fattura"
+  styleClass="document-detail-dialog"
   [modal]="true"
   [visible]="detailVisible()"
-  [style]="{ width: 'min(68rem, 92vw)' }"
+  [style]="{ width: 'min(70rem, calc(100vw - 1rem))', maxHeight: 'calc(100dvh - 1rem)' }"
+  [contentStyle]="{ padding: '0' }"
   (visibleChange)="detailVisible.set($event)"
   (onHide)="closeDetail()"
 >
   @if (detailLoading()) {
-    <div class="space-y-3 py-2">
-      <div class="h-4 w-48 animate-pulse rounded bg-slate-100"></div>
-      <div class="grid gap-3 md:grid-cols-4">
-        <div class="h-20 animate-pulse rounded bg-slate-100"></div>
-        <div class="h-20 animate-pulse rounded bg-slate-100"></div>
-        <div class="h-20 animate-pulse rounded bg-slate-100"></div>
-        <div class="h-20 animate-pulse rounded bg-slate-100"></div>
+    <div class="space-y-4 p-4 md:p-5">
+      <div class="h-20 animate-pulse rounded-md bg-slate-100"></div>
+      <div class="grid gap-3 md:grid-cols-2">
+        <div class="h-48 animate-pulse rounded-md bg-slate-100"></div>
+        <div class="h-48 animate-pulse rounded-md bg-slate-100"></div>
       </div>
     </div>
   } @else if (selectedInvoice(); as detail) {
-    <div class="space-y-5">
-      <section class="grid gap-3 md:grid-cols-4">
-        <div class="rounded-md border border-slate-200 p-3">
-          <p class="text-xs uppercase tracking-[0.06em] text-slate-500">Fattura</p>
-          <p class="mt-1 font-semibold text-slate-950">{{ detail.invoiceNumber || '-' }}</p>
-        </div>
-        <div class="rounded-md border border-slate-200 p-3">
-          <p class="text-xs uppercase tracking-[0.06em] text-slate-500">Ordine</p>
-          <p class="mt-1 font-semibold text-slate-950">{{ detail.orderNumber || '-' }}</p>
-        </div>
-        <div class="rounded-md border border-slate-200 p-3">
-          <p class="text-xs uppercase tracking-[0.06em] text-slate-500">Totale</p>
-          <p class="mt-1 font-semibold text-slate-950">{{ formatCurrency(detail.total) }}</p>
-        </div>
-        <div class="rounded-md border border-slate-200 p-3">
-          <p class="text-xs uppercase tracking-[0.06em] text-slate-500">Seriali</p>
-          <p class="mt-1 font-semibold text-slate-950">{{ detailSerialsCount(detail) }}</p>
-        </div>
-      </section>
+    <div class="max-h-[calc(100dvh-5rem)] overflow-y-auto">
+      <section class="border-b border-slate-200 bg-slate-50 px-4 py-4 md:px-5">
+        <div class="flex flex-col gap-4">
+          <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+            <div class="min-w-0">
+              <p class="text-xs font-medium uppercase tracking-[0.06em] text-slate-500">Fattura</p>
+              <div class="mt-1 flex flex-wrap items-center gap-2">
+                <h2 class="text-2xl font-semibold leading-tight text-slate-950">
+                  {{ detail.invoiceNumber || '-' }}
+                </h2>
+                <span
+                  class="inline-flex rounded-md bg-sky-50 px-2 py-1 text-xs font-semibold text-sky-700"
+                >
+                  {{ detail.invoiceType || 'Documento' }}
+                </span>
+                @if (editing()) {
+                  <span
+                    class="inline-flex rounded-md bg-teal-50 px-2 py-1 text-xs font-semibold text-teal-700"
+                  >
+                    Modifica
+                  </span>
+                }
+              </div>
+            </div>
 
-      <section class="grid gap-3 md:grid-cols-2">
-        <div>
-          <h3 class="text-sm font-semibold text-slate-950">Dati fattura</h3>
-          <dl class="mt-2 grid gap-2 text-sm md:grid-cols-2">
-            <div><dt class="text-slate-500">Tipo</dt><dd>{{ detail.invoiceType || '-' }}</dd></div>
-            <div><dt class="text-slate-500">Cliente</dt><dd>{{ detail.clientCode || '-' }}</dd></div>
-            <div><dt class="text-slate-500">Data</dt><dd>{{ detail.invoiceDate || '-' }}</dd></div>
-            <div><dt class="text-slate-500">Scadenza</dt><dd>{{ detail.dueDate || '-' }}</dd></div>
-            <div><dt class="text-slate-500">Imponibile</dt><dd>{{ formatCurrency(detail.amountExVat) }}</dd></div>
-            <div><dt class="text-slate-500">IVA</dt><dd>{{ formatCurrency(detail.vat) }}</dd></div>
-            <div><dt class="text-slate-500">Banca</dt><dd>{{ detail.bank || '-' }}</dd></div>
-            <div><dt class="text-slate-500">IBAN</dt><dd>{{ detail.iban || '-' }}</dd></div>
-          </dl>
-        </div>
-        <div>
-          <h3 class="text-sm font-semibold text-slate-950">Anagrafica</h3>
-          <dl class="mt-2 grid gap-2 text-sm md:grid-cols-2">
-            <div><dt class="text-slate-500">Acquirente</dt><dd>{{ detail.buyerName || '-' }}</dd></div>
-            <div><dt class="text-slate-500">P. IVA</dt><dd>{{ detail.buyerVat || '-' }}</dd></div>
-            <div class="md:col-span-2"><dt class="text-slate-500">Indirizzo</dt><dd>{{ detail.buyerAddress || '-' }}</dd></div>
-            <div><dt class="text-slate-500">Chirurgo</dt><dd>{{ detail.surgeon || '-' }}</dd></div>
-            <div><dt class="text-slate-500">Paziente</dt><dd>{{ detail.patient || '-' }}</dd></div>
-            <div><dt class="text-slate-500">CUP</dt><dd>{{ detail.cupCode || '-' }}</dd></div>
-            <div><dt class="text-slate-500">CIG</dt><dd>{{ detail.cigCode || '-' }}</dd></div>
-          </dl>
-        </div>
-      </section>
-
-      <section>
-        <h3 class="text-sm font-semibold text-slate-950">Righe fattura</h3>
-        <div class="mt-2 overflow-hidden rounded-md border border-slate-200">
-          @for (line of detail.lines; track line.id) {
-            <div class="grid gap-2 border-b border-slate-200 px-3 py-2 text-sm last:border-b-0 md:grid-cols-[8rem_minmax(0,1fr)_5rem_6rem_6rem]">
-              <span class="font-medium text-slate-900">{{ line.articolo || '-' }}</span>
-              <span>{{ line.descrizione || '-' }}</span>
-              <span class="text-right">{{ line.quantita ?? '-' }}</span>
-              <span class="text-right">{{ formatCurrency(line.prezzo) }}</span>
-              <span class="text-right">{{ formatCurrency(line.importo) }}</span>
-              @if (line.seriali.length > 0) {
-                <span class="text-slate-500 md:col-span-5">Seriali: {{ line.seriali.join(', ') }}</span>
+            <div class="flex flex-col gap-2 sm:flex-row sm:items-center">
+              @if (editing()) {
+                <button
+                  pButton
+                  type="button"
+                  icon="pi pi-check"
+                  label="Salva"
+                  size="small"
+                  [loading]="detailSaving()"
+                  [disabled]="detailDeleting()"
+                  (click)="saveEdit(detail)"
+                ></button>
+                <button
+                  pButton
+                  type="button"
+                  icon="pi pi-times"
+                  label="Annulla"
+                  size="small"
+                  severity="secondary"
+                  [disabled]="detailSaving() || detailDeleting()"
+                  (click)="cancelEdit()"
+                ></button>
+              } @else {
+                <button
+                  pButton
+                  type="button"
+                  icon="pi pi-pencil"
+                  label="Modifica"
+                  size="small"
+                  severity="secondary"
+                  [disabled]="detailDeleting()"
+                  (click)="startEdit(detail)"
+                ></button>
+                <button
+                  pButton
+                  type="button"
+                  icon="pi pi-trash"
+                  label="Elimina"
+                  size="small"
+                  severity="danger"
+                  [loading]="detailDeleting()"
+                  (click)="deleteInvoice(detail)"
+                ></button>
               }
             </div>
-          } @empty {
-            <p class="px-3 py-4 text-sm text-slate-500">Nessuna riga fattura.</p>
-          }
+          </div>
+
+          <div class="grid grid-cols-2 gap-2 text-sm sm:grid-cols-4">
+            <div class="rounded-md border border-slate-200 bg-white px-3 py-2">
+              <p class="text-xs text-slate-500">Ordine</p>
+              <p class="mt-0.5 truncate font-semibold text-slate-950">
+                {{ detail.orderNumber || '-' }}
+              </p>
+            </div>
+            <div class="rounded-md border border-slate-200 bg-white px-3 py-2">
+              <p class="text-xs text-slate-500">Cliente</p>
+              <p class="mt-0.5 truncate font-semibold text-slate-950">
+                {{ detail.clientCode || '-' }}
+              </p>
+            </div>
+            <div class="rounded-md border border-slate-200 bg-white px-3 py-2">
+              <p class="text-xs text-slate-500">Totale</p>
+              <p class="mt-0.5 truncate font-semibold text-slate-950">
+                {{ formatCurrency(detail.total) }}
+              </p>
+            </div>
+            <div class="rounded-md border border-slate-200 bg-white px-3 py-2">
+              <p class="text-xs text-slate-500">Seriali</p>
+              <p class="mt-0.5 truncate font-semibold text-slate-950">
+                {{ detailSerialsCount(detail) }}
+              </p>
+            </div>
+          </div>
         </div>
       </section>
+
+      <div class="grid gap-4 p-4 md:grid-cols-[minmax(0,1fr)_minmax(20rem,0.72fr)] md:p-5">
+        <section class="min-w-0">
+          <div class="flex items-center justify-between gap-3">
+            <h3 class="text-sm font-semibold text-slate-950">Dati fattura</h3>
+          </div>
+
+          @if (editing()) {
+            @if (editDraft(); as draft) {
+              <div class="mt-3 grid gap-3 text-sm sm:grid-cols-2">
+                <label class="block">
+                  <span class="text-xs font-medium text-slate-600">Numero fattura</span>
+                  <input
+                    type="text"
+                    [class]="inputClass()"
+                    [value]="draft.invoiceNumber"
+                    [disabled]="detailSaving()"
+                    (input)="updateDraft('invoiceNumber', $event)"
+                  />
+                </label>
+                <label class="block">
+                  <span class="text-xs font-medium text-slate-600">Tipo</span>
+                  <input
+                    type="text"
+                    [class]="inputClass()"
+                    [value]="draft.invoiceType"
+                    [disabled]="detailSaving()"
+                    (input)="updateDraft('invoiceType', $event)"
+                  />
+                </label>
+                <label class="block">
+                  <span class="text-xs font-medium text-slate-600">Ordine</span>
+                  <input
+                    type="text"
+                    [class]="inputClass()"
+                    [value]="draft.orderNumber"
+                    [disabled]="detailSaving()"
+                    (input)="updateDraft('orderNumber', $event)"
+                  />
+                </label>
+                <label class="block">
+                  <span class="text-xs font-medium text-slate-600">Cliente</span>
+                  <input
+                    type="text"
+                    [class]="inputClass()"
+                    [value]="draft.clientCode"
+                    [disabled]="detailSaving()"
+                    (input)="updateDraft('clientCode', $event)"
+                  />
+                </label>
+                <label class="block">
+                  <span class="text-xs font-medium text-slate-600">Data</span>
+                  <input
+                    type="date"
+                    [class]="inputClass()"
+                    [value]="draft.invoiceDate"
+                    [disabled]="detailSaving()"
+                    (input)="updateDraft('invoiceDate', $event)"
+                  />
+                </label>
+                <label class="block">
+                  <span class="text-xs font-medium text-slate-600">Scadenza</span>
+                  <input
+                    type="date"
+                    [class]="inputClass()"
+                    [value]="draft.dueDate"
+                    [disabled]="detailSaving()"
+                    (input)="updateDraft('dueDate', $event)"
+                  />
+                </label>
+                <label class="block">
+                  <span class="text-xs font-medium text-slate-600">Imponibile</span>
+                  <input
+                    type="number"
+                    step="0.01"
+                    [class]="inputClass()"
+                    [value]="draft.amountExVat"
+                    [disabled]="detailSaving()"
+                    (input)="updateDraft('amountExVat', $event)"
+                  />
+                </label>
+                <label class="block">
+                  <span class="text-xs font-medium text-slate-600">IVA</span>
+                  <input
+                    type="number"
+                    step="0.01"
+                    [class]="inputClass()"
+                    [value]="draft.vat"
+                    [disabled]="detailSaving()"
+                    (input)="updateDraft('vat', $event)"
+                  />
+                </label>
+                <label class="block">
+                  <span class="text-xs font-medium text-slate-600">Totale lordo</span>
+                  <input
+                    type="number"
+                    step="0.01"
+                    [class]="inputClass()"
+                    [value]="draft.totalWithoutDiscount"
+                    [disabled]="detailSaving()"
+                    (input)="updateDraft('totalWithoutDiscount', $event)"
+                  />
+                </label>
+                <label class="block">
+                  <span class="text-xs font-medium text-slate-600">Sconto</span>
+                  <input
+                    type="number"
+                    step="0.01"
+                    [class]="inputClass()"
+                    [value]="draft.discount"
+                    [disabled]="detailSaving()"
+                    (input)="updateDraft('discount', $event)"
+                  />
+                </label>
+                <label class="block">
+                  <span class="text-xs font-medium text-slate-600">Totale</span>
+                  <input
+                    type="number"
+                    step="0.01"
+                    [class]="inputClass()"
+                    [value]="draft.total"
+                    [disabled]="detailSaving()"
+                    (input)="updateDraft('total', $event)"
+                  />
+                </label>
+                <label class="block">
+                  <span class="text-xs font-medium text-slate-600">Banca</span>
+                  <input
+                    type="text"
+                    [class]="inputClass()"
+                    [value]="draft.bank"
+                    [disabled]="detailSaving()"
+                    (input)="updateDraft('bank', $event)"
+                  />
+                </label>
+                <label class="block sm:col-span-2">
+                  <span class="text-xs font-medium text-slate-600">IBAN</span>
+                  <input
+                    type="text"
+                    [class]="inputClass()"
+                    [value]="draft.iban"
+                    [disabled]="detailSaving()"
+                    (input)="updateDraft('iban', $event)"
+                  />
+                </label>
+              </div>
+            }
+          } @else {
+            <dl class="mt-3 grid gap-2 text-sm sm:grid-cols-2">
+              <div class="rounded-md bg-slate-50 px-3 py-2">
+                <dt class="text-xs text-slate-500">Data</dt>
+                <dd class="mt-0.5 break-words font-medium text-slate-950">
+                  {{ detail.invoiceDate || '-' }}
+                </dd>
+              </div>
+              <div class="rounded-md bg-slate-50 px-3 py-2">
+                <dt class="text-xs text-slate-500">Scadenza</dt>
+                <dd class="mt-0.5 break-words font-medium text-slate-950">
+                  {{ detail.dueDate || '-' }}
+                </dd>
+              </div>
+              <div class="rounded-md bg-slate-50 px-3 py-2">
+                <dt class="text-xs text-slate-500">Imponibile</dt>
+                <dd class="mt-0.5 break-words font-medium text-slate-950">
+                  {{ formatCurrency(detail.amountExVat) }}
+                </dd>
+              </div>
+              <div class="rounded-md bg-slate-50 px-3 py-2">
+                <dt class="text-xs text-slate-500">IVA</dt>
+                <dd class="mt-0.5 break-words font-medium text-slate-950">
+                  {{ formatCurrency(detail.vat) }}
+                </dd>
+              </div>
+              <div class="rounded-md bg-slate-50 px-3 py-2">
+                <dt class="text-xs text-slate-500">Banca</dt>
+                <dd class="mt-0.5 break-words font-medium text-slate-950">
+                  {{ detail.bank || '-' }}
+                </dd>
+              </div>
+              <div class="rounded-md bg-slate-50 px-3 py-2">
+                <dt class="text-xs text-slate-500">IBAN</dt>
+                <dd class="mt-0.5 break-words font-medium text-slate-950">
+                  {{ detail.iban || '-' }}
+                </dd>
+              </div>
+              <div class="rounded-md bg-slate-50 px-3 py-2 sm:col-span-2">
+                <dt class="text-xs text-slate-500">Tipo</dt>
+                <dd class="mt-0.5 break-words font-medium text-slate-950">
+                  {{ detail.invoiceType || '-' }}
+                </dd>
+              </div>
+            </dl>
+          }
+        </section>
+
+        <section class="min-w-0">
+          <h3 class="text-sm font-semibold text-slate-950">Anagrafica</h3>
+          @if (editing()) {
+            @if (editDraft(); as draft) {
+              <div class="mt-3 grid gap-3 text-sm sm:grid-cols-2">
+                <label class="block">
+                  <span class="text-xs font-medium text-slate-600">Acquirente</span>
+                  <input
+                    type="text"
+                    [class]="inputClass()"
+                    [value]="draft.buyerName"
+                    [disabled]="detailSaving()"
+                    (input)="updateDraft('buyerName', $event)"
+                  />
+                </label>
+                <label class="block">
+                  <span class="text-xs font-medium text-slate-600">P. IVA</span>
+                  <input
+                    type="text"
+                    [class]="inputClass()"
+                    [value]="draft.buyerVat"
+                    [disabled]="detailSaving()"
+                    (input)="updateDraft('buyerVat', $event)"
+                  />
+                </label>
+                <label class="block sm:col-span-2">
+                  <span class="text-xs font-medium text-slate-600">Indirizzo</span>
+                  <textarea
+                    [class]="textareaClass()"
+                    [value]="draft.buyerAddress"
+                    [disabled]="detailSaving()"
+                    (input)="updateDraft('buyerAddress', $event)"
+                  ></textarea>
+                </label>
+                <label class="block">
+                  <span class="text-xs font-medium text-slate-600">Chirurgo</span>
+                  <input
+                    type="text"
+                    [class]="inputClass()"
+                    [value]="draft.surgeon"
+                    [disabled]="detailSaving()"
+                    (input)="updateDraft('surgeon', $event)"
+                  />
+                </label>
+                <label class="block">
+                  <span class="text-xs font-medium text-slate-600">Paziente</span>
+                  <input
+                    type="text"
+                    [class]="inputClass()"
+                    [value]="draft.patient"
+                    [disabled]="detailSaving()"
+                    (input)="updateDraft('patient', $event)"
+                  />
+                </label>
+                <label class="block">
+                  <span class="text-xs font-medium text-slate-600">Referente</span>
+                  <input
+                    type="text"
+                    [class]="inputClass()"
+                    [value]="draft.representative"
+                    [disabled]="detailSaving()"
+                    (input)="updateDraft('representative', $event)"
+                  />
+                </label>
+                <label class="block">
+                  <span class="text-xs font-medium text-slate-600">CUP</span>
+                  <input
+                    type="text"
+                    [class]="inputClass()"
+                    [value]="draft.cupCode"
+                    [disabled]="detailSaving()"
+                    (input)="updateDraft('cupCode', $event)"
+                  />
+                </label>
+                <label class="block">
+                  <span class="text-xs font-medium text-slate-600">CIG</span>
+                  <input
+                    type="text"
+                    [class]="inputClass()"
+                    [value]="draft.cigCode"
+                    [disabled]="detailSaving()"
+                    (input)="updateDraft('cigCode', $event)"
+                  />
+                </label>
+              </div>
+            }
+          } @else {
+            <dl class="mt-3 grid gap-2 text-sm sm:grid-cols-2">
+              <div class="rounded-md bg-slate-50 px-3 py-2">
+                <dt class="text-xs text-slate-500">Acquirente</dt>
+                <dd class="mt-0.5 break-words font-medium text-slate-950">
+                  {{ detail.buyerName || '-' }}
+                </dd>
+              </div>
+              <div class="rounded-md bg-slate-50 px-3 py-2">
+                <dt class="text-xs text-slate-500">P. IVA</dt>
+                <dd class="mt-0.5 break-words font-medium text-slate-950">
+                  {{ detail.buyerVat || '-' }}
+                </dd>
+              </div>
+              <div class="rounded-md bg-slate-50 px-3 py-2 sm:col-span-2">
+                <dt class="text-xs text-slate-500">Indirizzo</dt>
+                <dd class="mt-0.5 break-words font-medium text-slate-950">
+                  {{ detail.buyerAddress || '-' }}
+                </dd>
+              </div>
+              <div class="rounded-md bg-slate-50 px-3 py-2">
+                <dt class="text-xs text-slate-500">Chirurgo</dt>
+                <dd class="mt-0.5 break-words font-medium text-slate-950">
+                  {{ detail.surgeon || '-' }}
+                </dd>
+              </div>
+              <div class="rounded-md bg-slate-50 px-3 py-2">
+                <dt class="text-xs text-slate-500">Paziente</dt>
+                <dd class="mt-0.5 break-words font-medium text-slate-950">
+                  {{ detail.patient || '-' }}
+                </dd>
+              </div>
+              <div class="rounded-md bg-slate-50 px-3 py-2">
+                <dt class="text-xs text-slate-500">CUP</dt>
+                <dd class="mt-0.5 break-words font-medium text-slate-950">
+                  {{ detail.cupCode || '-' }}
+                </dd>
+              </div>
+              <div class="rounded-md bg-slate-50 px-3 py-2">
+                <dt class="text-xs text-slate-500">CIG</dt>
+                <dd class="mt-0.5 break-words font-medium text-slate-950">
+                  {{ detail.cigCode || '-' }}
+                </dd>
+              </div>
+            </dl>
+          }
+        </section>
+
+        <section class="min-w-0 md:col-span-2">
+          <div class="flex items-center justify-between gap-3">
+            <h3 class="text-sm font-semibold text-slate-950">Righe fattura</h3>
+            <span class="text-xs text-slate-500">{{ detail.lines.length }} righe</span>
+          </div>
+          <div class="mt-3 overflow-hidden rounded-md border border-slate-200">
+            @for (line of detail.lines; track line.id) {
+              <div class="border-b border-slate-200 px-3 py-3 text-sm last:border-b-0">
+                <div
+                  class="grid gap-2 md:grid-cols-[8rem_minmax(0,1fr)_4rem_6rem_6rem] md:items-start"
+                >
+                  <div class="font-semibold text-slate-950">{{ line.articolo || '-' }}</div>
+                  <div class="min-w-0 break-words text-slate-700">
+                    {{ line.descrizione || '-' }}
+                  </div>
+                  <div class="font-medium text-slate-950 md:text-right">
+                    {{ line.quantita ?? '-' }}
+                  </div>
+                  <div class="font-medium text-slate-950 md:text-right">
+                    {{ formatCurrency(line.prezzo) }}
+                  </div>
+                  <div class="font-semibold text-slate-950 md:text-right">
+                    {{ formatCurrency(line.importo) }}
+                  </div>
+                </div>
+                @if (line.seriali.length > 0) {
+                  <div class="mt-2 flex flex-wrap gap-1.5">
+                    @for (seriale of line.seriali; track seriale) {
+                      <span
+                        class="rounded-md bg-slate-100 px-2 py-1 text-xs font-medium text-slate-600"
+                      >
+                        {{ seriale }}
+                      </span>
+                    }
+                  </div>
+                }
+              </div>
+            } @empty {
+              <p class="px-3 py-4 text-sm text-slate-500">Nessuna riga fattura.</p>
+            }
+          </div>
+        </section>
+      </div>
     </div>
   }
 </p-dialog>
