@@ -6,7 +6,7 @@
   .p-fileupload-header {
     gap: 0.5rem;
     border-color: #e2e8f0;
-    background: #ffffff;
+    background: #f8fafc;
   }
 
   .p-fileupload-content {
@@ -23,14 +23,84 @@
 
   .p-button {
     border-radius: 6px;
+    font-weight: 600;
   }
 
   .p-datatable-thead > tr > th {
     background: #f8fafc;
-    color: #475569;
+    color: #334155;
     font-size: 0.75rem;
     text-transform: uppercase;
     letter-spacing: 0.04em;
+  }
+
+  .p-datatable-tbody > tr {
+    transition: background-color 160ms ease;
+  }
+
+  .pretty-table .p-datatable-tbody > tr {
+    border-bottom: 1px solid #e2e8f0;
+  }
+
+  .pretty-table .p-datatable-tbody > tr:hover > td {
+    background: #f8fafc;
+  }
+
+  .pretty-table .p-datatable-tbody > tr > td:first-child {
+    border-left: 3px solid transparent;
+  }
+
+  .pretty-table .p-datatable-tbody > tr:hover > td:first-child {
+    border-left-color: #0f766e;
+  }
+
+  .p-paginator {
+    justify-content: flex-end;
+    border: 0;
+    padding: 0.5rem 0.75rem;
+  }
+
+  .p-dialog {
+    border-radius: 8px;
+    overflow: hidden;
+  }
+
+  .p-dialog-header {
+    border-bottom: 1px solid #e2e8f0;
+    padding: 1rem 1.25rem;
+  }
+
+  .p-dialog-content {
+    padding: 1rem 1.25rem 1.25rem;
+  }
+
+  .order-detail-dialog,
+  .document-detail-dialog {
+    max-height: calc(100dvh - 1rem);
+  }
+
+  .order-detail-dialog .p-dialog-header,
+  .document-detail-dialog .p-dialog-header {
+    background: #ffffff;
+    min-height: 3.5rem;
+  }
+
+  .order-detail-dialog .p-dialog-content,
+  .document-detail-dialog .p-dialog-content {
+    overflow: hidden;
+  }
+
+  @media (max-width: 640px) {
+    .order-detail-dialog,
+    .document-detail-dialog {
+      margin: 0.5rem;
+      max-height: calc(100dvh - 1rem);
+    }
+
+    .order-detail-dialog .p-dialog-header,
+    .document-detail-dialog .p-dialog-header {
+      padding: 0.875rem 1rem;
+    }
   }
 
   .data-table .p-datatable-wrapper {
@@ -119,6 +189,17 @@
 
     100% {
       background-position: 0 50%;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .data-table .skeleton-line,
+    .data-table .skeleton-pill {
+      animation: none;
+    }
+
+    .p-datatable-tbody > tr {
+      transition: none;
     }
   }
 }

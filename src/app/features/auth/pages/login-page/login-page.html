@@ -1,0 +1,56 @@
+<main class="flex min-h-screen items-center justify-center bg-[#f4f7f7] px-5 py-10">
+  <section
+    class="w-full max-w-md overflow-hidden rounded-md border border-slate-200 bg-white shadow-sm"
+  >
+    <div class="border-b border-slate-200 bg-slate-50 px-5 py-4">
+      <div class="flex items-center gap-3">
+        <span
+          class="flex h-10 w-10 items-center justify-center rounded-md bg-teal-700 text-sm font-bold text-white"
+        >
+          LC
+        </span>
+        <div>
+          <h1 class="text-xl font-semibold text-slate-950">LC Medical</h1>
+          <p class="text-sm text-slate-500">Accesso applicazione</p>
+        </div>
+      </div>
+    </div>
+
+    <form class="space-y-4 px-5 py-5" (submit)="$event.preventDefault(); login()">
+      <div>
+        <label for="login-email" class="text-sm font-medium text-slate-700">Email</label>
+        <input
+          id="login-email"
+          type="email"
+          autocomplete="email"
+          class="mt-1 h-11 w-full rounded-md border border-slate-300 bg-white px-3 text-sm text-slate-900 outline-none transition focus:border-teal-600 focus:ring-2 focus:ring-teal-100"
+          [value]="email()"
+          [disabled]="loading()"
+          (input)="updateEmail($event)"
+        />
+      </div>
+
+      <div>
+        <label for="login-password" class="text-sm font-medium text-slate-700">Password</label>
+        <input
+          id="login-password"
+          type="password"
+          autocomplete="current-password"
+          class="mt-1 h-11 w-full rounded-md border border-slate-300 bg-white px-3 text-sm text-slate-900 outline-none transition focus:border-teal-600 focus:ring-2 focus:ring-teal-100"
+          [value]="password()"
+          [disabled]="loading()"
+          (input)="updatePassword($event)"
+        />
+      </div>
+
+      <button
+        pButton
+        type="submit"
+        icon="pi pi-lock"
+        label="Entra"
+        class="w-full"
+        [loading]="loading()"
+      ></button>
+    </form>
+  </section>
+</main>
