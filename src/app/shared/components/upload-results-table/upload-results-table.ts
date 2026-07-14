@@ -64,7 +64,14 @@ export class UploadResultsTable {
       return '-';
     }
 
-    return String(resultItem['orderNumber'] ?? resultItem['invoiceNumber'] ?? resultItem['id'] ?? '-');
+    const uniqueOrders = resultItem['uniqueOrders'];
+    if (typeof uniqueOrders === 'number') {
+      return `${uniqueOrders} ordini`;
+    }
+
+    return String(
+      resultItem['orderNumber'] ?? resultItem['invoiceNumber'] ?? resultItem['id'] ?? '-',
+    );
   }
 
   protected documentDetail(queueItem: UploadQueueItem): string {
@@ -79,9 +86,20 @@ export class UploadResultsTable {
 
     const invoiceNumber = result.item['invoiceNumber'];
     const orderNumber = result.item['orderNumber'];
+    const importedItems = result.item['importedItems'];
+    const duplicateItems = result.item['duplicateItems'];
+    const skippedRows = result.item['skippedRows'];
+
+    if (
+      typeof importedItems === 'number' &&
+      typeof duplicateItems === 'number' &&
+      typeof skippedRows === 'number'
+    ) {
+      return `${importedItems} righe nuove, ${duplicateItems} già presenti, ${skippedRows} scartate`;
+    }
 
     if (invoiceNumber && orderNumber) {
-      return `Invoice ${invoiceNumber} - ordine ${orderNumber}`;
+      return `Fattura ${invoiceNumber} - ordine ${orderNumber}`;
     }
 
     if (orderNumber) {

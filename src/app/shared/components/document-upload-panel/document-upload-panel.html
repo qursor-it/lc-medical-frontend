@@ -1,12 +1,7 @@
 <article class="rounded-md border border-slate-200 bg-white shadow-sm">
   <div class="border-b border-slate-200 px-4 py-3">
     <div class="flex items-center justify-between gap-4">
-      <div>
-        <h2 class="text-base font-semibold text-slate-950">Seleziona file</h2>
-        <p class="mt-1 text-xs text-slate-500">
-          Invia PDF verso <span class="font-mono">{{ config().endpointLabel }}</span>
-        </p>
-      </div>
+      <h2 class="text-base font-semibold text-slate-950">File</h2>
       @if (uploading()) {
         <p-tag severity="info" value="Invio in corso" />
       }
@@ -17,16 +12,16 @@
     <p-fileupload
       styleClass="compact-file-upload"
       name="file"
-      accept="application/pdf"
+      [accept]="config().accept"
       invalidFileTypeMessageSummary="{0}: formato non valido"
-      invalidFileTypeMessageDetail="Carica solo PDF."
+      [invalidFileTypeMessageDetail]="config().invalidFileTypeMessageDetail"
       [chooseLabel]="config().chooseLabel"
       [uploadLabel]="config().uploadLabel"
       cancelLabel="Svuota"
       [customUpload]="true"
       [disabled]="uploading()"
       [files]="files()"
-      [maxFileSize]="20_000_000"
+      [maxFileSize]="config().maxFileSize"
       [multiple]="true"
       [showCancelButton]="false"
       [showUploadButton]="false"
@@ -36,7 +31,9 @@
     >
       <ng-template #content let-files>
         @if (files.length > 0) {
-          <div class="flex min-h-16 items-center justify-center gap-3 rounded-md border border-dashed border-teal-200 bg-teal-50 px-4 py-4 text-center">
+          <div
+            class="flex min-h-16 items-center justify-center gap-3 rounded-md border border-dashed border-teal-200 bg-teal-50 px-4 py-4 text-center"
+          >
             <i class="pi pi-check-circle text-xl text-teal-700"></i>
             <div>
               <p class="text-sm font-medium text-slate-900">
@@ -47,11 +44,15 @@
         }
       </ng-template>
       <ng-template #empty>
-        <div class="flex min-h-24 flex-col items-center justify-center gap-2 rounded-md border border-dashed border-slate-300 bg-slate-50 px-4 py-5 text-center">
+        <div
+          class="flex min-h-24 flex-col items-center justify-center gap-2 rounded-md border border-dashed border-slate-300 bg-slate-50 px-4 py-5 text-center"
+        >
           <i class="pi text-2xl" [class]="config().icon + ' ' + config().iconClass"></i>
           <div>
             <p class="text-sm font-medium text-slate-800">{{ config().emptyTitle }}</p>
-            <p class="mt-1 text-xs text-slate-500">{{ config().emptyDescription }}</p>
+            @if (config().emptyDescription) {
+              <p class="mt-1 text-xs text-slate-500">{{ config().emptyDescription }}</p>
+            }
           </div>
         </div>
       </ng-template>

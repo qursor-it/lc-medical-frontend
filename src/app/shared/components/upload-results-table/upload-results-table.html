@@ -5,7 +5,7 @@
   </div>
 
   @if (items().length > 0) {
-    <p-table [value]="items()" styleClass="text-sm" [tableStyle]="{ 'min-width': '52rem' }">
+    <p-table [value]="items()" styleClass="data-table text-sm" [tableStyle]="{ 'min-width': '52rem' }">
       <ng-template pTemplate="header">
         <tr>
           <th>File</th>
@@ -34,7 +34,7 @@
     </p-table>
   } @else {
     <div class="px-4 py-8 text-center text-sm text-slate-500">
-      Nessun file selezionato.
+      Coda vuota.
     </div>
   }
 

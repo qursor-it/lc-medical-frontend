@@ -30,11 +30,11 @@ export class UploadsPage {
 
   protected readonly config = computed<UploadPanelConfig>(() => uploadPanelConfigs[this.kind()]);
   protected readonly selectedFiles = computed(() => this.uploadQueue().map((item) => item.file));
-  protected readonly successfulUploads = computed(() =>
-    this.uploadQueue().filter((item) => item.status === 'success').length,
+  protected readonly successfulUploads = computed(
+    () => this.uploadQueue().filter((item) => item.status === 'success').length,
   );
-  protected readonly failedUploads = computed(() =>
-    this.uploadQueue().filter((item) => item.status === 'failed').length,
+  protected readonly failedUploads = computed(
+    () => this.uploadQueue().filter((item) => item.status === 'failed').length,
   );
 
   constructor() {
@@ -45,7 +45,9 @@ export class UploadsPage {
   }
 
   protected updateSelectedFiles(files: File[]): void {
-    const previousItems = new Map(this.uploadQueue().map((item) => [this.fileKey(item.file), item]));
+    const previousItems = new Map(
+      this.uploadQueue().map((item) => [this.fileKey(item.file), item]),
+    );
 
     this.uploadQueue.set(
       files.map((file): UploadQueueItem => {
@@ -79,20 +81,18 @@ export class UploadsPage {
       this.messages.add({
         severity: 'warn',
         summary: 'Nessun file selezionato',
-        detail: 'Seleziona almeno un PDF da caricare.',
+        detail: 'Seleziona almeno un file da caricare.',
       });
       return;
     }
 
     this.uploading.set(true);
     this.uploadQueue.update((items) =>
-      items.map(
-        (item): UploadQueueItem => ({
-          ...item,
-          status: files.some((file) => this.fileKey(file) === item.id) ? 'uploading' : item.status,
-          error: null,
-        }),
-      ),
+      items.map((item): UploadQueueItem => ({
+        ...item,
+        status: files.some((file) => this.fileKey(file) === item.id) ? 'uploading' : item.status,
+        error: null,
+      })),
     );
 
     this.uploadService.uploadBatch(this.kind(), files).subscribe({
@@ -103,21 +103,19 @@ export class UploadsPage {
 
         this.messages.add({
           severity: failureCount ? 'warn' : 'success',
-          summary: this.kind() === 'orders' ? 'Ordini processati' : 'Invoice processate',
-          detail: `${successCount} salvati, ${failureCount} errori.`,
+          summary: this.processedSummary(),
+          detail: this.processedDetail(response, successCount, failureCount),
         });
       },
       error: (error: HttpErrorResponse) => {
         const message = this.errorMessage(error);
         this.uploadQueue.update((items) =>
-          items.map(
-            (item): UploadQueueItem => ({
-              ...item,
-              status: item.status === 'uploading' ? 'failed' : item.status,
-              error: item.status === 'uploading' ? message : item.error,
-              result: item.status === 'uploading' ? null : item.result,
-            }),
-          ),
+          items.map((item): UploadQueueItem => ({
+            ...item,
+            status: item.status === 'uploading' ? 'failed' : item.status,
+            error: item.status === 'uploading' ? message : item.error,
+            result: item.status === 'uploading' ? null : item.result,
+          })),
         );
         this.messages.add({
           severity: 'error',
@@ -138,7 +136,9 @@ export class UploadsPage {
           return item;
         }
 
-        const resultIndex = remainingResults.findIndex((result) => result.fileName === item.fileName);
+        const resultIndex = remainingResults.findIndex(
+          (result) => result.fileName === item.fileName,
+        );
         const result = resultIndex >= 0 ? remainingResults.splice(resultIndex, 1)[0] : null;
 
         if (!result) {
@@ -162,6 +162,45 @@ export class UploadsPage {
 
   private fileKey(file: File): string {
     return `${file.name}-${file.size}-${file.lastModified}`;
+  }
+
+  private processedSummary(): string {
+    const summaries: Record<UploadKind, string> = {
+      orders: 'Ordini processati',
+      invoices: 'Fatture processate',
+      'paid-order-items': 'Pagamenti processati',
+    };
+
+    return summaries[this.kind()];
+  }
+
+  private processedDetail(
+    response: BatchUploadResult[],
+    successCount: number,
+    failureCount: number,
+  ): string {
+    if (this.kind() !== 'paid-order-items') {
+      return `${successCount} salvati, ${failureCount} errori.`;
+    }
+
+    const totals = response.reduce(
+      (accumulator, result) => {
+        const item = result.item;
+        return {
+          importedItems: accumulator.importedItems + this.numberValue(item?.['importedItems']),
+          duplicateItems: accumulator.duplicateItems + this.numberValue(item?.['duplicateItems']),
+          skippedRows: accumulator.skippedRows + this.numberValue(item?.['skippedRows']),
+        };
+      },
+      { importedItems: 0, duplicateItems: 0, skippedRows: 0 },
+    );
+
+    const failureDetail = failureCount > 0 ? ` ${failureCount} file con errori.` : '';
+    return `${totals.importedItems} righe nuove, ${totals.duplicateItems} già presenti, ${totals.skippedRows} scartate.${failureDetail}`;
+  }
+
+  private numberValue(value: unknown): number {
+    return typeof value === 'number' ? value : 0;
   }
 
   private errorMessage(error: HttpErrorResponse): string {

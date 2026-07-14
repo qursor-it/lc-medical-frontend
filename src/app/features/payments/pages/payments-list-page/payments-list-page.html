@@ -1,0 +1,256 @@
+<section class="border-b border-slate-200 bg-white">
+  <div
+    class="mx-auto flex w-full max-w-7xl flex-col gap-3 px-5 py-3 sm:flex-row sm:items-center sm:justify-between lg:px-8"
+  >
+    <div>
+      <h1 class="text-xl font-semibold leading-tight text-slate-950">Pagamenti</h1>
+      <p class="mt-0.5 text-sm text-slate-500">{{ resultLabel() }}</p>
+    </div>
+
+    <div class="flex flex-col gap-2 sm:flex-row sm:items-center">
+      <a
+        pButton
+        routerLink="/uploads/payments"
+        icon="pi pi-file-excel"
+        label="Importa"
+        severity="secondary"
+      ></a>
+      <button
+        pButton
+        type="button"
+        icon="pi pi-refresh"
+        label="Aggiorna"
+        severity="secondary"
+        [loading]="loading()"
+        (click)="loadPayments()"
+      ></button>
+    </div>
+  </div>
+</section>
+
+<section class="mx-auto flex w-full max-w-7xl flex-col gap-4 px-5 py-4 lg:px-8">
+  <div class="grid gap-3 md:grid-cols-3">
+    <article class="rounded-md border border-slate-200 bg-white px-4 py-3 shadow-sm">
+      <p class="text-xs font-medium uppercase tracking-[0.06em] text-slate-500">Righe totali</p>
+      <p class="mt-1 text-2xl font-semibold text-slate-950">{{ totalItems() }}</p>
+    </article>
+    <article class="rounded-md border border-slate-200 bg-white px-4 py-3 shadow-sm">
+      <p class="text-xs font-medium uppercase tracking-[0.06em] text-slate-500">Ordini in pagina</p>
+      <p class="mt-1 text-2xl font-semibold text-teal-700">{{ pageOrders() }}</p>
+    </article>
+    <article class="rounded-md border border-slate-200 bg-white px-4 py-3 shadow-sm">
+      <p class="text-xs font-medium uppercase tracking-[0.06em] text-slate-500">Totale pagina</p>
+      <p class="mt-1 text-2xl font-semibold text-slate-950">{{ formatCurrency(pageTotal()) }}</p>
+    </article>
+  </div>
+
+  <div
+    class="relative overflow-hidden rounded-md border border-slate-200 bg-white shadow-sm"
+    [attr.aria-busy]="loading()"
+  >
+    <div class="border-b border-slate-200 bg-white px-4 py-4">
+      <div class="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
+        <div class="flex flex-wrap items-center gap-2 text-sm">
+          <span class="font-semibold text-slate-900">Archivio pagamenti</span>
+          <span class="rounded-md bg-slate-100 px-2 py-1 text-xs font-semibold text-slate-600">{{
+            resultLabel()
+          }}</span>
+          @if (hasSearch()) {
+            <span
+              class="inline-flex min-w-0 max-w-full items-center gap-1 rounded-md border border-teal-200 bg-teal-50 px-2 py-1 text-xs font-semibold text-teal-800"
+            >
+              <i class="pi pi-filter text-[0.7rem]"></i>
+              <span class="truncate">{{ appliedSearch() }}</span>
+            </span>
+          }
+        </div>
+        @if (loading()) {
+          <span
+            class="inline-flex items-center gap-2 rounded-md bg-teal-50 px-2 py-1 text-xs font-semibold text-teal-700"
+          >
+            <i class="pi pi-spin pi-spinner text-xs"></i>
+            Caricamento
+          </span>
+        }
+
+        <div class="flex flex-col gap-2 lg:flex-row lg:items-center lg:justify-end">
+          <label class="sr-only" for="payments-search">
+            Cerca ordine, documento, cliente, articolo o seriale
+          </label>
+          <div class="relative min-w-0 lg:w-[30rem]">
+            <i
+              class="pi pi-search absolute left-3 top-1/2 -translate-y-1/2 text-sm text-slate-400"
+            ></i>
+            <input
+              id="payments-search"
+              type="search"
+              class="h-11 w-full rounded-md border border-slate-300 bg-slate-50 pl-9 pr-10 text-sm text-slate-900 outline-none transition focus:border-teal-600 focus:bg-white focus:ring-2 focus:ring-teal-100"
+              placeholder="Cerca ordine, documento, cliente, articolo o seriale"
+              [value]="searchText()"
+              [disabled]="loading()"
+              (input)="onSearchInput($event)"
+              (keydown.enter)="applySearch()"
+              (keydown.escape)="clearSearch()"
+            />
+            @if (searchText() || appliedSearch()) {
+              <button
+                type="button"
+                class="absolute right-1.5 top-1/2 flex h-8 w-8 -translate-y-1/2 cursor-pointer items-center justify-center rounded-md text-slate-400 transition hover:bg-white hover:text-slate-700 focus:outline-none focus:ring-2 focus:ring-teal-100"
+                aria-label="Pulisci ricerca"
+                [disabled]="loading()"
+                (click)="clearSearch()"
+              >
+                <i class="pi pi-times text-xs"></i>
+              </button>
+            }
+          </div>
+          <button
+            pButton
+            type="button"
+            icon="pi pi-search"
+            label="Cerca"
+            [loading]="loading()"
+            (click)="applySearch()"
+          ></button>
+        </div>
+      </div>
+    </div>
+
+    @if (loading()) {
+      <div class="border-b border-slate-200 bg-slate-50 px-4 py-3">
+        <div class="h-2 overflow-hidden rounded-full bg-slate-200">
+          <div class="h-full w-1/3 animate-pulse rounded-full bg-teal-600"></div>
+        </div>
+      </div>
+    }
+
+    <p-table
+      [value]="loading() ? skeletonRows : payments()"
+      styleClass="data-table pretty-table text-sm"
+      [tableStyle]="{ 'min-width': '72rem' }"
+    >
+      <ng-template pTemplate="header">
+        <tr>
+          <th>Ordine</th>
+          <th>Documento</th>
+          <th>Cliente</th>
+          <th>Articolo</th>
+          <th>Seriale</th>
+          <th class="text-right">Qta</th>
+          <th class="text-right">Importo</th>
+          <th>Data</th>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="body" let-row>
+        @if (loading()) {
+          <tr class="skeleton-row">
+            <td><span class="skeleton-line w-24"></span></td>
+            <td><span class="skeleton-line w-24"></span></td>
+            <td><span class="skeleton-line w-28"></span></td>
+            <td><span class="skeleton-line w-24"></span></td>
+            <td><span class="skeleton-line w-28"></span></td>
+            <td><span class="skeleton-line w-10"></span></td>
+            <td><span class="skeleton-line w-20"></span></td>
+            <td><span class="skeleton-line w-20"></span></td>
+          </tr>
+        } @else {
+          <tr class="transition-colors hover:bg-slate-50">
+            <td>
+              <div class="flex min-w-0 items-center gap-3">
+                <div
+                  class="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-emerald-50 text-emerald-700"
+                >
+                  <i class="pi pi-check-circle text-sm"></i>
+                </div>
+                <div class="min-w-0">
+                  <span class="cell-clip font-semibold text-slate-950" [title]="row.orderNumber">
+                    {{ row.orderNumber }}
+                  </span>
+                  <span class="mt-0.5 block text-xs text-slate-500">
+                    {{ row.lineNumber != null ? 'Riga ' + row.lineNumber : 'Ordine' }}
+                  </span>
+                </div>
+              </div>
+            </td>
+            <td>
+              <div class="min-w-0">
+                <span
+                  class="cell-clip font-medium text-slate-900"
+                  [title]="row.documentNumber || '-'"
+                >
+                  {{ row.documentNumber || '-' }}
+                </span>
+                <span class="mt-0.5 block text-xs text-slate-500">{{ row.docType || '-' }}</span>
+              </div>
+            </td>
+            <td>
+              <div class="min-w-0">
+                <span
+                  class="cell-clip font-medium text-slate-900"
+                  [title]="row.customerName || '-'"
+                >
+                  {{ row.customerName || '-' }}
+                </span>
+                <span class="mt-0.5 block text-xs text-slate-500">{{
+                  row.customerCode || '-'
+                }}</span>
+              </div>
+            </td>
+            <td>
+              <div class="min-w-0">
+                <span class="cell-clip font-semibold text-slate-900" [title]="row.itemCode || '-'">
+                  {{ row.itemCode || '-' }}
+                </span>
+                <span
+                  class="mt-0.5 block max-w-72 truncate text-xs text-slate-500"
+                  [title]="row.description || '-'"
+                >
+                  {{ row.description || '-' }}
+                </span>
+              </div>
+            </td>
+            <td>
+              <span
+                class="inline-flex max-w-full items-center rounded-md bg-slate-100 px-2 py-1 text-xs font-semibold text-slate-700"
+                [title]="row.manufacturerSerial || '-'"
+              >
+                <span class="cell-clip">{{ row.manufacturerSerial || '-' }}</span>
+              </span>
+            </td>
+            <td class="text-right font-medium text-slate-900">{{ formatNumber(row.quantity) }}</td>
+            <td class="text-right font-semibold text-slate-950">
+              {{ formatCurrency(row.lineTotal) }}
+            </td>
+            <td>
+              <div class="min-w-0">
+                <span class="font-medium text-slate-900">{{ row.postingDate || '-' }}</span>
+                <span class="mt-0.5 block text-xs text-slate-500">{{
+                  row.paidPeriod || row.status || '-'
+                }}</span>
+              </div>
+            </td>
+          </tr>
+        }
+      </ng-template>
+      <ng-template pTemplate="emptymessage">
+        <tr>
+          <td colspan="8" class="py-10 text-center text-sm text-slate-500">
+            Nessun pagamento disponibile.
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+
+    <div class="border-t border-slate-200">
+      <p-paginator
+        [class.pointer-events-none]="loading()"
+        [class.opacity-60]="loading()"
+        [first]="page() * size()"
+        [rows]="size()"
+        [totalRecords]="totalItems()"
+        [rowsPerPageOptions]="[10, 20, 50, 100]"
+        (onPageChange)="onPageChange($event)"
+      />
+    </div>
+  </div>
+</section>
