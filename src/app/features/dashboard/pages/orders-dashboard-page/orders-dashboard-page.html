@@ -1,6 +1,6 @@
 <section class="border-b border-slate-200 bg-white">
   <div
-    class="mx-auto flex w-full max-w-7xl flex-col gap-3 px-5 py-3 md:flex-row md:items-center md:justify-between lg:px-8"
+    class="mx-auto flex w-full flex-col gap-3 px-5 py-3 md:flex-row md:items-center md:justify-between lg:px-8"
   >
     <div>
       <h1 class="text-xl font-semibold leading-tight text-slate-950">Dashboard</h1>
@@ -46,7 +46,7 @@
   </div>
 </section>
 
-<section class="mx-auto flex w-full max-w-7xl flex-col gap-5 px-5 py-4 lg:px-8">
+<section class="mx-auto flex w-full flex-col gap-5 px-5 py-4 lg:px-8">
   @if (loading()) {
     <div class="rounded-md border border-slate-200 bg-white p-5 shadow-sm">
       <div class="flex items-center gap-2 text-sm font-medium text-slate-600">
@@ -198,6 +198,7 @@
 </section>
 
 <p-dialog
+  appendTo="body"
   header="Dettaglio ordine"
   styleClass="order-detail-dialog"
   [modal]="true"

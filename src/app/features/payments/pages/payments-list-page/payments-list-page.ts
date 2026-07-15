@@ -1,8 +1,10 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { Component, computed, inject, OnInit, signal } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { MessageService } from 'primeng/api';
 import { ButtonModule } from 'primeng/button';
+import { DatePickerModule } from 'primeng/datepicker';
 import { PaginatorModule, PaginatorState } from 'primeng/paginator';
 import { TableModule } from 'primeng/table';
 import { TagModule } from 'primeng/tag';
@@ -16,7 +18,15 @@ import { PaidOrderItemsService } from '../../../../core/services/paid-order-item
 
 @Component({
   selector: 'app-payments-list-page',
-  imports: [ButtonModule, PaginatorModule, RouterLink, TableModule, TagModule],
+  imports: [
+    ButtonModule,
+    DatePickerModule,
+    FormsModule,
+    PaginatorModule,
+    RouterLink,
+    TableModule,
+    TagModule,
+  ],
   templateUrl: './payments-list-page.html',
 })
 export class PaymentsListPage implements OnInit {
@@ -31,6 +41,7 @@ export class PaymentsListPage implements OnInit {
   protected readonly skeletonRows = Array.from({ length: 8 });
   protected readonly searchText = signal('');
   protected readonly appliedSearch = signal('');
+  protected readonly monthDate = signal<Date | null>(null);
 
   protected readonly resultLabel = computed(() => {
     const total = this.totalItems();
@@ -52,7 +63,7 @@ export class PaymentsListPage implements OnInit {
     this.loading.set(true);
 
     this.paidOrderItemsService
-      .getPaidOrderItems(this.page(), this.size(), this.appliedSearch())
+      .getPaidOrderItems(this.page(), this.size(), this.appliedSearch(), this.monthParam())
       .pipe(finalize(() => this.loading.set(false)))
       .subscribe({
         next: (response) => this.applyPageResponse(response),
@@ -88,6 +99,20 @@ export class PaymentsListPage implements OnInit {
     this.appliedSearch.set('');
     this.page.set(0);
     this.loadPayments();
+  }
+
+  protected onMonthChange(date: Date | null): void {
+    this.monthDate.set(date);
+    this.page.set(0);
+    this.loadPayments();
+  }
+
+  private monthParam(): string {
+    const date = this.monthDate();
+    if (!date) {
+      return '';
+    }
+    return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
   }
 
   protected formatCurrency(value: number | null): string {

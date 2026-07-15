@@ -18,11 +18,21 @@ export class OrdersService {
     size: number,
     search = '',
     deepSearch = false,
+    month = '',
+    paymentStatus: '' | 'paid' | 'unpaid' = '',
   ): Observable<PageResponse<OrderListItem>> {
     let params = new HttpParams().set('page', page).set('size', size).set('deepSearch', deepSearch);
 
     if (search.trim().length > 0) {
       params = params.set('search', search.trim());
+    }
+
+    if (month) {
+      params = params.set('month', month);
+    }
+
+    if (paymentStatus) {
+      params = params.set('paymentStatus', paymentStatus);
     }
 
     return this.http.get<PageResponse<OrderListItem>>('/api/orders', { params });

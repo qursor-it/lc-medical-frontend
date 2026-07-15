@@ -1,6 +1,6 @@
 <section class="border-b border-slate-200 bg-white">
   <div
-    class="mx-auto flex w-full max-w-7xl flex-col gap-3 px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-5 lg:px-8"
+    class="mx-auto flex w-full flex-col gap-3 px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-5 lg:px-8"
   >
     <div>
       <h1 class="text-xl font-semibold leading-tight text-slate-950">Fatture</h1>
@@ -19,7 +19,7 @@
   </div>
 </section>
 
-<section class="mx-auto w-full max-w-7xl px-5 py-4 lg:px-8">
+<section class="mx-auto w-full px-5 py-4 lg:px-8">
   <div
     class="relative overflow-hidden rounded-md border border-slate-200 bg-white shadow-sm"
     [attr.aria-busy]="loading()"
@@ -55,6 +55,19 @@
         }
 
         <div class="flex flex-col gap-2 lg:flex-row lg:items-center lg:justify-end">
+          <p-datepicker
+            appendTo="body"
+            view="month"
+            dateFormat="mm/yy"
+            [readonlyInput]="true"
+            [showClear]="true"
+            [ngModel]="monthDate()"
+            (ngModelChange)="onMonthChange($event)"
+            [disabled]="loading()"
+            placeholder="Mese fattura"
+            styleClass="w-full lg:w-52"
+            inputStyleClass="w-full"
+          />
           <label class="sr-only" for="invoices-search">Cerca fattura o cliente</label>
           <div class="relative min-w-0 lg:w-[28rem]">
             <i
@@ -129,11 +142,19 @@
       <ng-template pTemplate="body" let-row>
         @if (loading()) {
           <tr class="skeleton-row">
+            <td class="mobile-card-primary">
+              <div class="flex items-center gap-3">
+                <span class="skeleton-block"></span>
+                <div class="min-w-0 flex-1">
+                  <span class="skeleton-line w-28"></span>
+                  <span class="skeleton-line w-14"></span>
+                </div>
+              </div>
+            </td>
             <td><span class="skeleton-line w-24"></span></td>
-            <td><span class="skeleton-line w-24"></span></td>
-            <td><span class="skeleton-line w-20"></span></td>
-            <td><span class="skeleton-line w-24"></span></td>
-            <td><span class="skeleton-line w-6"></span></td>
+            <td><span class="skeleton-pill"></span></td>
+            <td class="text-right"><span class="skeleton-line ml-auto w-16"></span></td>
+            <td class="text-right"><span class="skeleton-line ml-auto w-4"></span></td>
           </tr>
         } @else {
           <tr class="cursor-pointer transition-colors hover:bg-slate-50" (click)="openDetail(row)">
@@ -200,6 +221,7 @@
 </section>
 
 <p-dialog
+  appendTo="body"
   header="Dettaglio fattura"
   styleClass="document-detail-dialog"
   [modal]="true"

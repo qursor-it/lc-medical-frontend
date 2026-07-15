@@ -1,130 +1,102 @@
 <section class="border-b border-slate-200 bg-white">
   <div
-    class="mx-auto flex w-full max-w-7xl flex-col gap-3 px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-5 lg:px-8"
+    class="mx-auto flex w-full flex-col gap-3 px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-5 lg:px-8"
   >
     <div>
       <h1 class="text-xl font-semibold leading-tight text-slate-950">Utenti</h1>
-      <p class="mt-0.5 text-sm text-slate-500">{{ users().length }} account</p>
+      <p class="mt-0.5 text-sm text-slate-500">
+        {{ users().length === 1 ? '1 account' : users().length + ' account' }}
+      </p>
     </div>
 
-    <button
-      pButton
-      type="button"
-      icon="pi pi-refresh"
-      label="Aggiorna"
-      severity="secondary"
-      [loading]="loading()"
-      (click)="loadUsers()"
-    ></button>
+    <div class="flex items-center gap-2">
+      <button
+        pButton
+        type="button"
+        icon="pi pi-refresh"
+        label="Aggiorna"
+        severity="secondary"
+        [loading]="loading()"
+        (click)="loadUsers()"
+      ></button>
+      <button
+        pButton
+        type="button"
+        icon="pi pi-user-plus"
+        label="Nuovo utente"
+        (click)="openCreate()"
+      ></button>
+    </div>
   </div>
 </section>
 
-<section
-  class="mx-auto grid w-full max-w-7xl gap-5 px-5 py-4 lg:grid-cols-[24rem_minmax(0,1fr)] lg:px-8"
->
-  <form
-    class="h-fit rounded-md border border-slate-200 bg-white p-4 shadow-sm"
-    (submit)="$event.preventDefault(); createUser()"
-  >
-    <h2 class="text-base font-semibold text-slate-950">Nuovo utente</h2>
-
-    <div class="mt-4 space-y-3">
-      <div>
-        <label class="text-sm font-medium text-slate-700" for="user-full-name">Nome</label>
-        <input
-          id="user-full-name"
-          type="text"
-          class="mt-1 h-10 w-full rounded-md border border-slate-300 px-3 text-sm outline-none transition focus:border-teal-600 focus:ring-2 focus:ring-teal-100"
-          [value]="fullName()"
-          [disabled]="saving()"
-          (input)="updateFullName($event)"
-        />
-      </div>
-
-      <div>
-        <label class="text-sm font-medium text-slate-700" for="user-email">Email</label>
-        <input
-          id="user-email"
-          type="email"
-          class="mt-1 h-10 w-full rounded-md border border-slate-300 px-3 text-sm outline-none transition focus:border-teal-600 focus:ring-2 focus:ring-teal-100"
-          [value]="email()"
-          [disabled]="saving()"
-          (input)="updateEmail($event)"
-        />
-      </div>
-
-      <div>
-        <label class="text-sm font-medium text-slate-700" for="user-password">Password</label>
-        <input
-          id="user-password"
-          type="password"
-          class="mt-1 h-10 w-full rounded-md border border-slate-300 px-3 text-sm outline-none transition focus:border-teal-600 focus:ring-2 focus:ring-teal-100"
-          [value]="password()"
-          [disabled]="saving()"
-          (input)="updatePassword($event)"
-        />
-      </div>
-
-      <div>
-        <label class="text-sm font-medium text-slate-700" for="user-role">Ruolo</label>
-        <select
-          id="user-role"
-          class="mt-1 h-10 w-full rounded-md border border-slate-300 bg-white px-3 text-sm outline-none transition focus:border-teal-600 focus:ring-2 focus:ring-teal-100"
-          [value]="role()"
-          [disabled]="saving()"
-          (change)="updateRole($event)"
-        >
-          <option value="USER">Utente</option>
-          <option value="ADMIN">Admin</option>
-        </select>
-      </div>
-    </div>
-
-    <button
-      pButton
-      type="submit"
-      icon="pi pi-user-plus"
-      label="Crea"
-      class="mt-4 w-full"
-      [loading]="saving()"
-    ></button>
-  </form>
-
-  <section class="overflow-hidden rounded-md border border-slate-200 bg-white shadow-sm">
-    <div class="border-b border-slate-200 bg-slate-50 px-4 py-3">
-      <h2 class="text-base font-semibold text-slate-950">Account applicazione</h2>
+<section class="mx-auto w-full px-5 py-4 lg:px-8">
+  <div class="overflow-hidden rounded-md border border-slate-200 bg-white shadow-sm">
+    <div
+      class="flex items-center justify-between gap-3 border-b border-slate-200 bg-slate-50 px-4 py-3"
+    >
+      <h2 class="text-sm font-semibold text-slate-900">Account applicazione</h2>
+      <span class="rounded-md bg-slate-100 px-2 py-1 text-xs font-semibold text-slate-600">
+        {{ users().length }} totali
+      </span>
     </div>
 
     <p-table
       [value]="users()"
       styleClass="data-table pretty-table mobile-card-table text-sm"
-      [tableStyle]="{ 'min-width': '48rem' }"
+      [tableStyle]="{ 'min-width': '52rem' }"
     >
       <ng-template pTemplate="header">
         <tr>
           <th>Utente</th>
           <th>Ruolo</th>
+          <th>Permessi</th>
           <th>Stato</th>
           <th class="text-right">Azioni</th>
         </tr>
       </ng-template>
       <ng-template pTemplate="body" let-user>
-        <tr>
+        <tr class="transition-colors hover:bg-slate-50">
           <td class="mobile-card-primary">
-            <div class="min-w-0">
-              <p class="cell-clip font-semibold text-slate-950">{{ user.fullName }}</p>
-              <p class="cell-clip text-xs text-slate-500">{{ user.email }}</p>
+            <div class="flex min-w-0 items-center gap-3">
+              <div
+                class="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-teal-50 text-teal-700"
+              >
+                <i class="pi pi-user text-sm"></i>
+              </div>
+              <div class="min-w-0">
+                <span class="cell-clip font-semibold text-slate-950" [title]="user.fullName">{{
+                  user.fullName
+                }}</span>
+                <span class="mt-0.5 block cell-clip text-xs text-slate-500" [title]="user.email">{{
+                  user.email
+                }}</span>
+              </div>
             </div>
           </td>
           <td data-label="Ruolo">
-            <select
-              class="h-9 rounded-md border border-slate-300 bg-white px-2 text-sm outline-none transition focus:border-teal-600 focus:ring-2 focus:ring-teal-100"
-              [value]="user.role"
-              (change)="changeRole(user, $event)"
-            >
-              <option value="USER">Utente</option>
-              <option value="ADMIN">Admin</option>
-            </select>
+            <p-select
+              appendTo="body"
+              [options]="roleOptions"
+              optionLabel="label"
+              optionValue="value"
+              [ngModel]="user.role"
+              (ngModelChange)="changeRole(user, $event)"
+              styleClass="w-36"
+              ariaLabel="Ruolo utente"
+            />
+          </td>
+          <td data-label="Permessi">
+            @if (user.role === 'ADMIN') {
+              <span
+                class="inline-flex items-center gap-1 rounded-md bg-teal-50 px-2 py-1 text-xs font-semibold text-teal-800"
+              >
+                <i class="pi pi-verified text-[0.7rem]"></i>
+                Accesso completo
+              </span>
+            } @else {
+              <span class="text-xs text-slate-600">{{ permissionSummary(user) }}</span>
+            }
           </td>
           <td data-label="Stato">
             <p-tag
@@ -151,6 +123,7 @@
                 icon="pi pi-trash"
                 label="Elimina"
                 severity="danger"
+                [outlined]="true"
                 size="small"
                 [disabled]="user.id === auth.currentUser()?.id"
                 (click)="deleteUser(user)"
@@ -161,19 +134,96 @@
       </ng-template>
       <ng-template pTemplate="emptymessage">
         <tr>
-          <td colspan="4" class="py-10 text-center text-sm text-slate-500">
+          <td colspan="5" class="py-10 text-center text-sm text-slate-500">
             Nessun utente disponibile.
           </td>
         </tr>
       </ng-template>
     </p-table>
-  </section>
+  </div>
 </section>
 
 <p-dialog
+  appendTo="body"
+  header="Nuovo utente"
+  [modal]="true"
+  [visible]="createVisible()"
+  [style]="{ width: 'min(32rem, calc(100vw - 2rem))' }"
+  (onHide)="closeCreate()"
+>
+  <form class="space-y-3" (submit)="$event.preventDefault(); createUser()">
+    <div>
+      <label class="text-sm font-medium text-slate-700" for="user-full-name">Nome</label>
+      <input
+        id="user-full-name"
+        type="text"
+        [class]="inputClass()"
+        [value]="fullName()"
+        [disabled]="saving()"
+        (input)="updateFullName($event)"
+      />
+    </div>
+
+    <div>
+      <label class="text-sm font-medium text-slate-700" for="user-email">Email</label>
+      <input
+        id="user-email"
+        type="email"
+        [class]="inputClass()"
+        [value]="email()"
+        [disabled]="saving()"
+        (input)="updateEmail($event)"
+      />
+    </div>
+
+    <div>
+      <label class="text-sm font-medium text-slate-700" for="user-password">Password</label>
+      <input
+        id="user-password"
+        type="password"
+        [class]="inputClass()"
+        [value]="password()"
+        [disabled]="saving()"
+        (input)="updatePassword($event)"
+      />
+      <p class="mt-1 text-xs text-slate-500">Almeno 8 caratteri.</p>
+    </div>
+
+    <div>
+      <label class="text-sm font-medium text-slate-700" for="user-role">Ruolo</label>
+      <p-select
+        inputId="user-role"
+        appendTo="body"
+        [options]="roleOptions"
+        optionLabel="label"
+        optionValue="value"
+        [ngModel]="role()"
+        (ngModelChange)="role.set($event)"
+        [ngModelOptions]="{ standalone: true }"
+        [disabled]="saving()"
+        styleClass="mt-1 w-full"
+      />
+    </div>
+
+    <div class="mt-5 flex justify-end gap-2">
+      <button
+        pButton
+        type="button"
+        label="Annulla"
+        severity="secondary"
+        [disabled]="saving()"
+        (click)="closeCreate()"
+      ></button>
+      <button pButton type="submit" icon="pi pi-check" label="Crea" [loading]="saving()"></button>
+    </div>
+  </form>
+</p-dialog>
+
+<p-dialog
+  appendTo="body"
   [visible]="permissionsUser() !== null"
   [modal]="true"
-  [style]="{ width: '30rem' }"
+  [style]="{ width: 'min(30rem, calc(100vw - 2rem))' }"
   [header]="'Permessi · ' + (permissionsUser()?.fullName ?? '')"
   (onHide)="closePermissions()"
 >

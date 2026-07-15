@@ -1,8 +1,10 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { Component, inject, OnInit, signal } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 import { MessageService } from 'primeng/api';
 import { ButtonModule } from 'primeng/button';
 import { DialogModule } from 'primeng/dialog';
+import { SelectModule } from 'primeng/select';
 import { TableModule } from 'primeng/table';
 import { TagModule } from 'primeng/tag';
 import { finalize } from 'rxjs';
@@ -22,7 +24,7 @@ const EMPTY_PERMISSIONS: UserPermissions = {
 
 @Component({
   selector: 'app-users-page',
-  imports: [ButtonModule, DialogModule, TableModule, TagModule],
+  imports: [ButtonModule, DialogModule, FormsModule, SelectModule, TableModule, TagModule],
   templateUrl: './users-page.html',
 })
 export class UsersPage implements OnInit {
@@ -33,10 +35,17 @@ export class UsersPage implements OnInit {
   protected readonly users = signal<AuthUser[]>([]);
   protected readonly loading = signal(false);
   protected readonly saving = signal(false);
+
+  protected readonly createVisible = signal(false);
   protected readonly email = signal('');
   protected readonly fullName = signal('');
   protected readonly password = signal('');
   protected readonly role = signal<UserRole>('USER');
+
+  protected readonly roleOptions = [
+    { label: 'Utente', value: 'USER' as UserRole },
+    { label: 'Admin', value: 'ADMIN' as UserRole },
+  ];
 
   protected readonly permissionsUser = signal<AuthUser | null>(null);
   protected readonly permissionsDraft = signal<UserPermissions>({ ...EMPTY_PERMISSIONS });
@@ -55,6 +64,18 @@ export class UsersPage implements OnInit {
         next: (users) => this.users.set(users),
         error: (error: HttpErrorResponse) => this.showError('Utenti non caricati', error),
       });
+  }
+
+  protected openCreate(): void {
+    this.email.set('');
+    this.fullName.set('');
+    this.password.set('');
+    this.role.set('USER');
+    this.createVisible.set(true);
+  }
+
+  protected closeCreate(): void {
+    this.createVisible.set(false);
   }
 
   protected createUser(): void {
@@ -81,18 +102,17 @@ export class UsersPage implements OnInit {
           this.users.update((users) =>
             [...users, user].sort((a, b) => a.email.localeCompare(b.email)),
           );
-          this.email.set('');
-          this.fullName.set('');
-          this.password.set('');
-          this.role.set('USER');
+          this.closeCreate();
           this.messages.add({ severity: 'success', summary: 'Utente creato' });
         },
         error: (error: HttpErrorResponse) => this.showError('Utente non creato', error),
       });
   }
 
-  protected changeRole(user: AuthUser, event: Event): void {
-    const role = (event.target as HTMLSelectElement).value as UserRole;
+  protected changeRole(user: AuthUser, role: UserRole): void {
+    if (role === user.role) {
+      return;
+    }
     this.usersService.updateRole(user.id, { role }).subscribe({
       next: (updated) =>
         this.users.update((users) =>
@@ -103,6 +123,24 @@ export class UsersPage implements OnInit {
         this.loadUsers();
       },
     });
+  }
+
+  protected permissionSummary(user: AuthUser): string {
+    const permissions = user.permissions;
+    if (!permissions) {
+      return 'Nessun accesso';
+    }
+    const sections: string[] = [];
+    if (permissions.canViewOrders || permissions.canUploadOrders) {
+      sections.push('Ordini');
+    }
+    if (permissions.canViewInvoices || permissions.canUploadInvoices) {
+      sections.push('Fatture');
+    }
+    if (permissions.canViewPayments || permissions.canUploadPayments) {
+      sections.push('Pagamenti');
+    }
+    return sections.length ? sections.join(' · ') : 'Nessun accesso';
   }
 
   protected openPermissions(user: AuthUser): void {
@@ -176,12 +214,8 @@ export class UsersPage implements OnInit {
     this.password.set((event.target as HTMLInputElement).value);
   }
 
-  protected updateRole(event: Event): void {
-    this.role.set((event.target as HTMLSelectElement).value as UserRole);
-  }
-
-  protected roleLabel(role: UserRole): string {
-    return role === 'ADMIN' ? 'Admin' : 'Utente';
+  protected inputClass(): string {
+    return 'mt-1 h-10 w-full rounded-md border border-slate-300 bg-white px-3 text-sm text-slate-900 outline-none transition focus:border-teal-600 focus:ring-2 focus:ring-teal-100';
   }
 
   private showError(summary: string, error: HttpErrorResponse): void {

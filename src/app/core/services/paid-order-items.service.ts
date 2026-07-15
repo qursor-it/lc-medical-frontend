@@ -12,11 +12,16 @@ export class PaidOrderItemsService {
     page: number,
     size: number,
     search = '',
+    month = '',
   ): Observable<PaidOrderItemsPageResponse> {
     let params = new HttpParams().set('page', page).set('size', size);
 
     if (search.trim().length > 0) {
       params = params.set('search', search.trim());
+    }
+
+    if (month) {
+      params = params.set('month', month);
     }
 
     return this.http.get<PaidOrderItemsPageResponse>('/api/paid-order-items', { params });

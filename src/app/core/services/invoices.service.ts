@@ -13,11 +13,16 @@ export class InvoicesService {
     size: number,
     search = '',
     deepSearch = false,
+    month = '',
   ): Observable<InvoicePageResponse> {
     let params = new HttpParams().set('page', page).set('size', size).set('deepSearch', deepSearch);
 
     if (search.trim().length > 0) {
       params = params.set('search', search.trim());
+    }
+
+    if (month) {
+      params = params.set('month', month);
     }
 
     return this.http.get<InvoicePageResponse>('/api/invoices', { params });

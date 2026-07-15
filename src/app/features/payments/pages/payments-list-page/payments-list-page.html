@@ -1,6 +1,6 @@
 <section class="border-b border-slate-200 bg-white">
   <div
-    class="mx-auto flex w-full max-w-7xl flex-col gap-3 px-5 py-3 sm:flex-row sm:items-center sm:justify-between lg:px-8"
+    class="mx-auto flex w-full flex-col gap-3 px-5 py-3 sm:flex-row sm:items-center sm:justify-between lg:px-8"
   >
     <div>
       <h1 class="text-xl font-semibold leading-tight text-slate-950">Pagamenti</h1>
@@ -28,7 +28,7 @@
   </div>
 </section>
 
-<section class="mx-auto flex w-full max-w-7xl flex-col gap-4 px-5 py-4 lg:px-8">
+<section class="mx-auto flex w-full flex-col gap-4 px-5 py-4 lg:px-8">
   <div class="grid gap-3 md:grid-cols-3">
     <article class="rounded-md border border-slate-200 bg-white px-4 py-3 shadow-sm">
       <p class="text-xs font-medium uppercase tracking-[0.06em] text-slate-500">Righe totali</p>
@@ -74,6 +74,19 @@
         }
 
         <div class="flex flex-col gap-2 lg:flex-row lg:items-center lg:justify-end">
+          <p-datepicker
+            appendTo="body"
+            view="month"
+            dateFormat="mm/yy"
+            [readonlyInput]="true"
+            [showClear]="true"
+            [ngModel]="monthDate()"
+            (ngModelChange)="onMonthChange($event)"
+            [disabled]="loading()"
+            placeholder="Mese registrazione"
+            styleClass="w-full lg:w-52"
+            inputStyleClass="w-full"
+          />
           <label class="sr-only" for="payments-search">
             Cerca ordine, documento, cliente, articolo o seriale
           </label>
@@ -144,14 +157,34 @@
       <ng-template pTemplate="body" let-row>
         @if (loading()) {
           <tr class="skeleton-row">
-            <td><span class="skeleton-line w-24"></span></td>
-            <td><span class="skeleton-line w-24"></span></td>
-            <td><span class="skeleton-line w-28"></span></td>
-            <td><span class="skeleton-line w-24"></span></td>
-            <td><span class="skeleton-line w-28"></span></td>
-            <td><span class="skeleton-line w-10"></span></td>
-            <td><span class="skeleton-line w-20"></span></td>
-            <td><span class="skeleton-line w-20"></span></td>
+            <td class="mobile-card-primary">
+              <div class="flex items-center gap-3">
+                <span class="skeleton-block"></span>
+                <div class="min-w-0 flex-1">
+                  <span class="skeleton-line w-24"></span>
+                  <span class="skeleton-line w-12"></span>
+                </div>
+              </div>
+            </td>
+            <td>
+              <span class="skeleton-line w-24"></span>
+              <span class="skeleton-line w-12"></span>
+            </td>
+            <td>
+              <span class="skeleton-line w-28"></span>
+              <span class="skeleton-line w-16"></span>
+            </td>
+            <td>
+              <span class="skeleton-line w-24"></span>
+              <span class="skeleton-line w-32"></span>
+            </td>
+            <td><span class="skeleton-pill"></span></td>
+            <td class="text-right"><span class="skeleton-line ml-auto w-10"></span></td>
+            <td class="text-right"><span class="skeleton-line ml-auto w-16"></span></td>
+            <td>
+              <span class="skeleton-line w-20"></span>
+              <span class="skeleton-line w-14"></span>
+            </td>
           </tr>
         } @else {
           <tr class="transition-colors hover:bg-slate-50">

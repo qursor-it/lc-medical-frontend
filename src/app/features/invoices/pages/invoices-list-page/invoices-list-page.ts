@@ -1,7 +1,9 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { Component, computed, inject, OnInit, signal } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 import { MessageService } from 'primeng/api';
 import { ButtonModule } from 'primeng/button';
+import { DatePickerModule } from 'primeng/datepicker';
 import { DialogModule } from 'primeng/dialog';
 import { PaginatorModule, PaginatorState } from 'primeng/paginator';
 import { TableModule } from 'primeng/table';
@@ -19,7 +21,7 @@ type InvoiceEditForm = Record<keyof UpdateInvoiceRequest, string>;
 
 @Component({
   selector: 'app-invoices-list-page',
-  imports: [ButtonModule, DialogModule, PaginatorModule, TableModule],
+  imports: [ButtonModule, DatePickerModule, DialogModule, FormsModule, PaginatorModule, TableModule],
   templateUrl: './invoices-list-page.html',
 })
 export class InvoicesListPage implements OnInit {
@@ -42,6 +44,7 @@ export class InvoicesListPage implements OnInit {
   protected readonly searchText = signal('');
   protected readonly appliedSearch = signal('');
   protected readonly deepSearch = signal(false);
+  protected readonly monthDate = signal<Date | null>(null);
   protected readonly resultLabel = computed(() => {
     const total = this.totalItems();
     return total === 1 ? '1 risultato' : `${total} risultati`;
@@ -56,7 +59,13 @@ export class InvoicesListPage implements OnInit {
     this.loading.set(true);
 
     this.invoicesService
-      .getInvoices(this.page(), this.size(), this.appliedSearch(), this.deepSearch())
+      .getInvoices(
+        this.page(),
+        this.size(),
+        this.appliedSearch(),
+        this.deepSearch(),
+        this.monthParam(),
+      )
       .pipe(finalize(() => this.loading.set(false)))
       .subscribe({
         next: (response) => this.applyPageResponse(response),
@@ -100,6 +109,20 @@ export class InvoicesListPage implements OnInit {
     this.appliedSearch.set('');
     this.page.set(0);
     this.loadInvoices();
+  }
+
+  protected onMonthChange(date: Date | null): void {
+    this.monthDate.set(date);
+    this.page.set(0);
+    this.loadInvoices();
+  }
+
+  private monthParam(): string {
+    const date = this.monthDate();
+    if (!date) {
+      return '';
+    }
+    return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
   }
 
   protected openDetail(invoice: InvoiceListItem): void {

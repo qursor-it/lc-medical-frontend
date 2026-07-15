@@ -1,9 +1,12 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { Component, computed, inject, OnInit, signal } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 import { MessageService } from 'primeng/api';
 import { ButtonModule } from 'primeng/button';
+import { DatePickerModule } from 'primeng/datepicker';
 import { DialogModule } from 'primeng/dialog';
 import { PaginatorModule, PaginatorState } from 'primeng/paginator';
+import { SelectModule } from 'primeng/select';
 import { TableModule } from 'primeng/table';
 import { TagModule } from 'primeng/tag';
 import { finalize } from 'rxjs';
@@ -21,7 +24,16 @@ type OrderEditForm = Record<keyof UpdateOrderRequest, string>;
 
 @Component({
   selector: 'app-orders-list-page',
-  imports: [ButtonModule, DialogModule, PaginatorModule, TableModule, TagModule],
+  imports: [
+    ButtonModule,
+    DatePickerModule,
+    DialogModule,
+    FormsModule,
+    PaginatorModule,
+    SelectModule,
+    TableModule,
+    TagModule,
+  ],
   templateUrl: './orders-list-page.html',
 })
 export class OrdersListPage implements OnInit {
@@ -44,6 +56,13 @@ export class OrdersListPage implements OnInit {
   protected readonly searchText = signal('');
   protected readonly appliedSearch = signal('');
   protected readonly deepSearch = signal(false);
+  protected readonly monthDate = signal<Date | null>(null);
+  protected readonly paymentFilter = signal<'' | 'paid' | 'unpaid'>('');
+  protected readonly paymentOptions = [
+    { label: 'Tutti i pagamenti', value: '' },
+    { label: 'Pagato', value: 'paid' },
+    { label: 'Non pagato', value: 'unpaid' },
+  ];
   protected readonly resultLabel = computed(() => {
     const total = this.totalItems();
     return total === 1 ? '1 risultato' : `${total} risultati`;
@@ -58,7 +77,14 @@ export class OrdersListPage implements OnInit {
     this.loading.set(true);
 
     this.ordersService
-      .getOrders(this.page(), this.size(), this.appliedSearch(), this.deepSearch())
+      .getOrders(
+        this.page(),
+        this.size(),
+        this.appliedSearch(),
+        this.deepSearch(),
+        this.monthParam(),
+        this.paymentFilter(),
+      )
       .pipe(finalize(() => this.loading.set(false)))
       .subscribe({
         next: (response) => this.applyPageResponse(response),
@@ -102,6 +128,26 @@ export class OrdersListPage implements OnInit {
     this.appliedSearch.set('');
     this.page.set(0);
     this.loadOrders();
+  }
+
+  protected onMonthChange(date: Date | null): void {
+    this.monthDate.set(date);
+    this.page.set(0);
+    this.loadOrders();
+  }
+
+  protected onPaymentFilterChange(value: '' | 'paid' | 'unpaid'): void {
+    this.paymentFilter.set(value);
+    this.page.set(0);
+    this.loadOrders();
+  }
+
+  private monthParam(): string {
+    const date = this.monthDate();
+    if (!date) {
+      return '';
+    }
+    return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
   }
 
   protected openDetail(order: OrderListItem): void {
