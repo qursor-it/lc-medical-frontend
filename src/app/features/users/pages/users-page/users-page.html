@@ -233,36 +233,55 @@
       caricato lui.
     </p>
 
-    <div class="space-y-4">
-      @for (
-        section of [
-          { key: 'orders', label: 'Ordini', upload: 'canUploadOrders', view: 'canViewOrders' },
-          { key: 'invoices', label: 'Fatture', upload: 'canUploadInvoices', view: 'canViewInvoices' },
-          { key: 'payments', label: 'Pagamenti', upload: 'canUploadPayments', view: 'canViewPayments' }
-        ];
-        track section.key
-      ) {
-        <div class="rounded-md border border-slate-200 p-3">
-          <p class="mb-2 text-sm font-semibold text-slate-900">{{ section.label }}</p>
-          <div class="flex flex-wrap gap-4">
-            <label class="flex items-center gap-2 text-sm text-slate-700">
-              <input
-                type="checkbox"
-                class="h-4 w-4 rounded border-slate-300 text-teal-700 focus:ring-teal-600"
-                [checked]="permissionValue($any(section.view))"
-                (change)="togglePermission($any(section.view), $event)"
-              />
-              Vedi lista
-            </label>
-            <label class="flex items-center gap-2 text-sm text-slate-700">
-              <input
-                type="checkbox"
-                class="h-4 w-4 rounded border-slate-300 text-teal-700 focus:ring-teal-600"
-                [checked]="permissionValue($any(section.upload))"
-                (change)="togglePermission($any(section.upload), $event)"
-              />
-              Carica file
-            </label>
+    <div class="mb-2 flex items-center justify-between gap-3">
+      <span class="text-xs font-semibold uppercase tracking-wide text-slate-400">
+        {{ grantedCount() }}/6 attivi
+      </span>
+      <div class="flex items-center gap-2 text-xs font-semibold">
+        <button type="button" class="text-teal-700 hover:underline" (click)="grantAll()">
+          Concedi tutto
+        </button>
+        <span class="text-slate-300">·</span>
+        <button type="button" class="text-slate-500 hover:underline" (click)="revokeAll()">
+          Revoca tutto
+        </button>
+      </div>
+    </div>
+
+    <div class="overflow-hidden rounded-md border border-slate-200">
+      <div
+        class="grid grid-cols-[minmax(0,1fr)_5rem_5rem] items-center gap-x-4 border-b border-slate-200 bg-slate-50 px-4 py-2 text-[0.7rem] font-semibold uppercase tracking-wide text-slate-500"
+      >
+        <span>Sezione</span>
+        <span class="text-center">Vedi</span>
+        <span class="text-center">Carica</span>
+      </div>
+
+      @for (section of permissionSections; track section.view) {
+        <div
+          class="grid grid-cols-[minmax(0,1fr)_5rem_5rem] items-center gap-x-4 border-b border-slate-200 px-4 py-3 last:border-b-0"
+        >
+          <div class="flex min-w-0 items-center gap-2.5">
+            <span
+              class="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-slate-100 text-slate-600"
+            >
+              <i [class]="section.icon + ' text-sm'"></i>
+            </span>
+            <span class="truncate text-sm font-medium text-slate-900">{{ section.label }}</span>
+          </div>
+          <div class="flex justify-center">
+            <p-toggleswitch
+              [ngModel]="permissionValue(section.view)"
+              (ngModelChange)="setPermission(section.view, $event)"
+              [ariaLabel]="'Vedi ' + section.label"
+            />
+          </div>
+          <div class="flex justify-center">
+            <p-toggleswitch
+              [ngModel]="permissionValue(section.upload)"
+              (ngModelChange)="setPermission(section.upload, $event)"
+              [ariaLabel]="'Carica ' + section.label"
+            />
           </div>
         </div>
       }

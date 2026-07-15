@@ -7,6 +7,7 @@ import { DialogModule } from 'primeng/dialog';
 import { SelectModule } from 'primeng/select';
 import { TableModule } from 'primeng/table';
 import { TagModule } from 'primeng/tag';
+import { ToggleSwitchModule } from 'primeng/toggleswitch';
 import { finalize } from 'rxjs';
 
 import { AuthUser, UserPermissions, UserRole } from '../../../../core/models/auth.models';
@@ -24,7 +25,15 @@ const EMPTY_PERMISSIONS: UserPermissions = {
 
 @Component({
   selector: 'app-users-page',
-  imports: [ButtonModule, DialogModule, FormsModule, SelectModule, TableModule, TagModule],
+  imports: [
+    ButtonModule,
+    DialogModule,
+    FormsModule,
+    SelectModule,
+    TableModule,
+    TagModule,
+    ToggleSwitchModule,
+  ],
   templateUrl: './users-page.html',
 })
 export class UsersPage implements OnInit {
@@ -50,6 +59,22 @@ export class UsersPage implements OnInit {
   protected readonly permissionsUser = signal<AuthUser | null>(null);
   protected readonly permissionsDraft = signal<UserPermissions>({ ...EMPTY_PERMISSIONS });
   protected readonly permissionsSaving = signal(false);
+
+  protected readonly permissionSections: {
+    label: string;
+    icon: string;
+    view: keyof UserPermissions;
+    upload: keyof UserPermissions;
+  }[] = [
+    { label: 'Ordini', icon: 'pi pi-list', view: 'canViewOrders', upload: 'canUploadOrders' },
+    { label: 'Fatture', icon: 'pi pi-table', view: 'canViewInvoices', upload: 'canUploadInvoices' },
+    {
+      label: 'Pagamenti',
+      icon: 'pi pi-credit-card',
+      view: 'canViewPayments',
+      upload: 'canUploadPayments',
+    },
+  ];
 
   ngOnInit(): void {
     this.loadUsers();
@@ -156,9 +181,27 @@ export class UsersPage implements OnInit {
     return this.permissionsDraft()[key];
   }
 
-  protected togglePermission(key: keyof UserPermissions, event: Event): void {
-    const checked = (event.target as HTMLInputElement).checked;
-    this.permissionsDraft.update((draft) => ({ ...draft, [key]: checked }));
+  protected setPermission(key: keyof UserPermissions, value: boolean): void {
+    this.permissionsDraft.update((draft) => ({ ...draft, [key]: value }));
+  }
+
+  protected grantedCount(): number {
+    return Object.values(this.permissionsDraft()).filter(Boolean).length;
+  }
+
+  protected grantAll(): void {
+    this.permissionsDraft.set({
+      canUploadOrders: true,
+      canViewOrders: true,
+      canUploadInvoices: true,
+      canViewInvoices: true,
+      canUploadPayments: true,
+      canViewPayments: true,
+    });
+  }
+
+  protected revokeAll(): void {
+    this.permissionsDraft.set({ ...EMPTY_PERMISSIONS });
   }
 
   protected savePermissions(): void {
