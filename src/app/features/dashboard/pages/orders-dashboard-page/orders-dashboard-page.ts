@@ -415,10 +415,6 @@ export class OrdersDashboardPage implements OnInit {
       return error.error.error;
     }
 
-    if (typeof error.message === 'string' && error.message.length > 0) {
-      return error.message;
-    }
-
-    return 'Il backend non ha risposto correttamente.';
+    return 'Operazione non riuscita. Controlla la connessione e riprova.';
   }
 }
