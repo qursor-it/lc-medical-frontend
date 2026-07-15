@@ -1,6 +1,6 @@
 import { Routes } from '@angular/router';
 
-import { adminGuard, authGuard } from './core/auth.guard';
+import { adminGuard, authGuard, permissionGuard } from './core/auth.guard';
 
 export const routes: Routes = [
   {
@@ -23,7 +23,7 @@ export const routes: Routes = [
   },
   {
     path: 'orders',
-    canActivate: [authGuard],
+    canActivate: [authGuard, permissionGuard('orders', 'view')],
     loadComponent: () =>
       import('./features/orders/pages/orders-list-page/orders-list-page').then(
         (m) => m.OrdersListPage,
@@ -31,7 +31,7 @@ export const routes: Routes = [
   },
   {
     path: 'invoices',
-    canActivate: [authGuard],
+    canActivate: [authGuard, permissionGuard('invoices', 'view')],
     loadComponent: () =>
       import('./features/invoices/pages/invoices-list-page/invoices-list-page').then(
         (m) => m.InvoicesListPage,
@@ -39,7 +39,7 @@ export const routes: Routes = [
   },
   {
     path: 'payments',
-    canActivate: [authGuard],
+    canActivate: [authGuard, permissionGuard('payments', 'view')],
     loadComponent: () =>
       import('./features/payments/pages/payments-list-page/payments-list-page').then(
         (m) => m.PaymentsListPage,
@@ -47,21 +47,21 @@ export const routes: Routes = [
   },
   {
     path: 'uploads/orders',
-    canActivate: [authGuard],
+    canActivate: [authGuard, permissionGuard('orders', 'upload')],
     data: { kind: 'orders' },
     loadComponent: () =>
       import('./features/uploads/pages/uploads-page/uploads-page').then((m) => m.UploadsPage),
   },
   {
     path: 'uploads/invoices',
-    canActivate: [authGuard],
+    canActivate: [authGuard, permissionGuard('invoices', 'upload')],
     data: { kind: 'invoices' },
     loadComponent: () =>
       import('./features/uploads/pages/uploads-page/uploads-page').then((m) => m.UploadsPage),
   },
   {
     path: 'uploads/payments',
-    canActivate: [authGuard],
+    canActivate: [authGuard, permissionGuard('payments', 'upload')],
     data: { kind: 'paid-order-items' },
     loadComponent: () =>
       import('./features/uploads/pages/uploads-page/uploads-page').then((m) => m.UploadsPage),

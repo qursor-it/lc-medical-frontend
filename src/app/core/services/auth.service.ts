@@ -2,7 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { computed, inject, Injectable, signal } from '@angular/core';
 import { Observable, tap } from 'rxjs';
 
-import { AuthResponse, AuthUser, LoginRequest } from '../models/auth.models';
+import { AuthResponse, AuthUser, LoginRequest, PermissionSection } from '../models/auth.models';
 
 interface AuthSession extends AuthResponse {}
 
@@ -15,6 +15,44 @@ export class AuthService {
   readonly currentUser = computed(() => this.validSession()?.user ?? null);
   readonly isAuthenticated = computed(() => this.validSession() !== null);
   readonly isAdmin = computed(() => this.currentUser()?.role === 'ADMIN');
+
+  /** Whether the current user can view the list of the given section. Admins can always. */
+  canView(section: PermissionSection): boolean {
+    if (this.isAdmin()) {
+      return true;
+    }
+    const permissions = this.currentUser()?.permissions;
+    if (!permissions) {
+      return false;
+    }
+    switch (section) {
+      case 'orders':
+        return permissions.canViewOrders;
+      case 'invoices':
+        return permissions.canViewInvoices;
+      case 'payments':
+        return permissions.canViewPayments;
+    }
+  }
+
+  /** Whether the current user can upload files for the given section. Admins can always. */
+  canUpload(section: PermissionSection): boolean {
+    if (this.isAdmin()) {
+      return true;
+    }
+    const permissions = this.currentUser()?.permissions;
+    if (!permissions) {
+      return false;
+    }
+    switch (section) {
+      case 'orders':
+        return permissions.canUploadOrders;
+      case 'invoices':
+        return permissions.canUploadInvoices;
+      case 'payments':
+        return permissions.canUploadPayments;
+    }
+  }
 
   login(request: LoginRequest): Observable<AuthResponse> {
     return this.http.post<AuthResponse>('/api/auth/login', request).pipe(

@@ -133,16 +133,29 @@
             />
           </td>
           <td data-label="Azioni" class="mobile-card-actions text-right">
-            <button
-              pButton
-              type="button"
-              icon="pi pi-trash"
-              label="Elimina"
-              severity="danger"
-              size="small"
-              [disabled]="user.id === auth.currentUser()?.id"
-              (click)="deleteUser(user)"
-            ></button>
+            <div class="inline-flex flex-wrap justify-end gap-2">
+              @if (user.role !== 'ADMIN') {
+                <button
+                  pButton
+                  type="button"
+                  icon="pi pi-shield"
+                  label="Permessi"
+                  severity="secondary"
+                  size="small"
+                  (click)="openPermissions(user)"
+                ></button>
+              }
+              <button
+                pButton
+                type="button"
+                icon="pi pi-trash"
+                label="Elimina"
+                severity="danger"
+                size="small"
+                [disabled]="user.id === auth.currentUser()?.id"
+                (click)="deleteUser(user)"
+              ></button>
+            </div>
           </td>
         </tr>
       </ng-template>
@@ -156,3 +169,72 @@
     </p-table>
   </section>
 </section>
+
+<p-dialog
+  [visible]="permissionsUser() !== null"
+  [modal]="true"
+  [style]="{ width: '30rem' }"
+  [header]="'Permessi · ' + (permissionsUser()?.fullName ?? '')"
+  (onHide)="closePermissions()"
+>
+  @if (permissionsUser(); as user) {
+    <p class="mb-4 text-sm text-slate-500">
+      Configura cosa può fare {{ user.email }}. L'utente vede comunque solo gli elementi che ha
+      caricato lui.
+    </p>
+
+    <div class="space-y-4">
+      @for (
+        section of [
+          { key: 'orders', label: 'Ordini', upload: 'canUploadOrders', view: 'canViewOrders' },
+          { key: 'invoices', label: 'Fatture', upload: 'canUploadInvoices', view: 'canViewInvoices' },
+          { key: 'payments', label: 'Pagamenti', upload: 'canUploadPayments', view: 'canViewPayments' }
+        ];
+        track section.key
+      ) {
+        <div class="rounded-md border border-slate-200 p-3">
+          <p class="mb-2 text-sm font-semibold text-slate-900">{{ section.label }}</p>
+          <div class="flex flex-wrap gap-4">
+            <label class="flex items-center gap-2 text-sm text-slate-700">
+              <input
+                type="checkbox"
+                class="h-4 w-4 rounded border-slate-300 text-teal-700 focus:ring-teal-600"
+                [checked]="permissionValue($any(section.view))"
+                (change)="togglePermission($any(section.view), $event)"
+              />
+              Vedi lista
+            </label>
+            <label class="flex items-center gap-2 text-sm text-slate-700">
+              <input
+                type="checkbox"
+                class="h-4 w-4 rounded border-slate-300 text-teal-700 focus:ring-teal-600"
+                [checked]="permissionValue($any(section.upload))"
+                (change)="togglePermission($any(section.upload), $event)"
+              />
+              Carica file
+            </label>
+          </div>
+        </div>
+      }
+    </div>
+
+    <div class="mt-5 flex justify-end gap-2">
+      <button
+        pButton
+        type="button"
+        label="Annulla"
+        severity="secondary"
+        [disabled]="permissionsSaving()"
+        (click)="closePermissions()"
+      ></button>
+      <button
+        pButton
+        type="button"
+        icon="pi pi-check"
+        label="Salva"
+        [loading]="permissionsSaving()"
+        (click)="savePermissions()"
+      ></button>
+    </div>
+  }
+</p-dialog>

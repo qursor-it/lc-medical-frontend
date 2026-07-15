@@ -2,17 +2,27 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { MessageService } from 'primeng/api';
 import { ButtonModule } from 'primeng/button';
+import { DialogModule } from 'primeng/dialog';
 import { TableModule } from 'primeng/table';
 import { TagModule } from 'primeng/tag';
 import { finalize } from 'rxjs';
 
-import { AuthUser, UserRole } from '../../../../core/models/auth.models';
+import { AuthUser, UserPermissions, UserRole } from '../../../../core/models/auth.models';
 import { AuthService } from '../../../../core/services/auth.service';
 import { UsersService } from '../../../../core/services/users.service';
 
+const EMPTY_PERMISSIONS: UserPermissions = {
+  canUploadOrders: false,
+  canViewOrders: false,
+  canUploadInvoices: false,
+  canViewInvoices: false,
+  canUploadPayments: false,
+  canViewPayments: false,
+};
+
 @Component({
   selector: 'app-users-page',
-  imports: [ButtonModule, TableModule, TagModule],
+  imports: [ButtonModule, DialogModule, TableModule, TagModule],
   templateUrl: './users-page.html',
 })
 export class UsersPage implements OnInit {
@@ -27,6 +37,10 @@ export class UsersPage implements OnInit {
   protected readonly fullName = signal('');
   protected readonly password = signal('');
   protected readonly role = signal<UserRole>('USER');
+
+  protected readonly permissionsUser = signal<AuthUser | null>(null);
+  protected readonly permissionsDraft = signal<UserPermissions>({ ...EMPTY_PERMISSIONS });
+  protected readonly permissionsSaving = signal(false);
 
   ngOnInit(): void {
     this.loadUsers();
@@ -89,6 +103,46 @@ export class UsersPage implements OnInit {
         this.loadUsers();
       },
     });
+  }
+
+  protected openPermissions(user: AuthUser): void {
+    this.permissionsUser.set(user);
+    this.permissionsDraft.set({ ...EMPTY_PERMISSIONS, ...user.permissions });
+  }
+
+  protected closePermissions(): void {
+    this.permissionsUser.set(null);
+  }
+
+  protected permissionValue(key: keyof UserPermissions): boolean {
+    return this.permissionsDraft()[key];
+  }
+
+  protected togglePermission(key: keyof UserPermissions, event: Event): void {
+    const checked = (event.target as HTMLInputElement).checked;
+    this.permissionsDraft.update((draft) => ({ ...draft, [key]: checked }));
+  }
+
+  protected savePermissions(): void {
+    const user = this.permissionsUser();
+    if (!user) {
+      return;
+    }
+
+    this.permissionsSaving.set(true);
+    this.usersService
+      .updatePermissions(user.id, this.permissionsDraft())
+      .pipe(finalize(() => this.permissionsSaving.set(false)))
+      .subscribe({
+        next: (updated) => {
+          this.users.update((users) =>
+            users.map((item) => (item.id === updated.id ? updated : item)),
+          );
+          this.closePermissions();
+          this.messages.add({ severity: 'success', summary: 'Permessi aggiornati' });
+        },
+        error: (error: HttpErrorResponse) => this.showError('Permessi non aggiornati', error),
+      });
   }
 
   protected deleteUser(user: AuthUser): void {

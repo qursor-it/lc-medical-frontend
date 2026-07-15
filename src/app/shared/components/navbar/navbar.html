@@ -1,0 +1,180 @@
+<header
+  class="sticky top-0 z-30 flex h-14 items-center justify-between border-b border-slate-200 bg-white/95 px-4 backdrop-blur lg:hidden"
+>
+  <button
+    type="button"
+    class="flex min-h-11 min-w-11 cursor-pointer items-center justify-center rounded-md text-slate-700 transition-colors hover:bg-slate-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-700"
+    aria-label="Apri menu"
+    [attr.aria-expanded]="isMobileNavOpen()"
+    aria-controls="app-sidebar"
+    (click)="toggleMobileNav()"
+  >
+    <i class="pi pi-bars text-base"></i>
+  </button>
+
+  <a
+    routerLink="/dashboard"
+    class="flex items-center gap-2 text-sm font-semibold text-slate-950"
+    (click)="closeMobileNav()"
+  >
+    <span
+      class="flex h-8 w-8 items-center justify-center rounded-md bg-teal-700 text-xs font-bold text-white"
+    >
+      LC
+    </span>
+    LC Medical
+  </a>
+
+  <span class="h-11 w-11" aria-hidden="true"></span>
+</header>
+
+@if (isMobileNavOpen()) {
+  <button
+    type="button"
+    class="fixed inset-0 z-40 cursor-pointer bg-slate-950/40 backdrop-blur-[1px] lg:hidden"
+    aria-label="Chiudi menu"
+    (click)="closeMobileNav()"
+  ></button>
+}
+
+<aside
+  id="app-sidebar"
+  class="fixed inset-y-0 left-0 z-50 flex w-72 max-w-[calc(100vw-2rem)] flex-col border-r border-slate-200 bg-white shadow-xl transition-transform duration-200 ease-out lg:static lg:z-auto lg:min-h-screen lg:w-auto lg:max-w-none lg:translate-x-0 lg:shadow-none"
+  [ngClass]="isMobileNavOpen() ? 'translate-x-0' : '-translate-x-full'"
+>
+  <div class="flex h-14 items-center justify-between px-4 lg:h-16">
+    <a
+      routerLink="/dashboard"
+      class="flex items-center gap-3 text-sm font-semibold text-slate-950"
+      (click)="closeMobileNav()"
+    >
+      <span
+        class="flex h-8 w-8 items-center justify-center rounded-md bg-teal-700 text-xs font-bold text-white"
+      >
+        LC
+      </span>
+      LC Medical
+    </a>
+
+    <button
+      type="button"
+      class="flex min-h-11 min-w-11 cursor-pointer items-center justify-center rounded-md text-slate-600 transition-colors hover:bg-slate-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-700 lg:hidden"
+      aria-label="Chiudi menu"
+      (click)="closeMobileNav()"
+    >
+      <i class="pi pi-times text-sm"></i>
+    </button>
+  </div>
+
+  <nav class="flex flex-col gap-1 px-3 pb-3">
+    <a
+      routerLink="/dashboard"
+      routerLinkActive="bg-teal-700 text-white hover:bg-teal-700 hover:text-white"
+      title="Dashboard"
+      class="flex min-h-11 items-center gap-3 rounded-md px-3 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-teal-50 hover:text-teal-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-700"
+      (click)="closeMobileNav()"
+    >
+      <i class="pi pi-chart-line"></i>
+      <span>Dashboard</span>
+    </a>
+    @if (auth.canView('orders')) {
+      <a
+        routerLink="/orders"
+        routerLinkActive="bg-teal-700 text-white hover:bg-teal-700 hover:text-white"
+        title="Ordini"
+        class="flex min-h-11 items-center gap-3 rounded-md px-3 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-teal-50 hover:text-teal-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-700"
+        (click)="closeMobileNav()"
+      >
+        <i class="pi pi-list"></i>
+        <span>Ordini</span>
+      </a>
+    }
+    @if (auth.canView('invoices')) {
+      <a
+        routerLink="/invoices"
+        routerLinkActive="bg-teal-700 text-white hover:bg-teal-700 hover:text-white"
+        title="Fatture"
+        class="flex min-h-11 items-center gap-3 rounded-md px-3 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-teal-50 hover:text-teal-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-700"
+        (click)="closeMobileNav()"
+      >
+        <i class="pi pi-table"></i>
+        <span>Fatture</span>
+      </a>
+    }
+    @if (auth.canView('payments')) {
+      <a
+        routerLink="/payments"
+        routerLinkActive="bg-teal-700 text-white hover:bg-teal-700 hover:text-white"
+        title="Pagamenti"
+        class="flex min-h-11 items-center gap-3 rounded-md px-3 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-teal-50 hover:text-teal-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-700"
+        (click)="closeMobileNav()"
+      >
+        <i class="pi pi-credit-card"></i>
+        <span>Pagamenti</span>
+      </a>
+    }
+    @if (auth.canUpload('orders')) {
+      <a
+        routerLink="/uploads/orders"
+        routerLinkActive="bg-teal-700 text-white hover:bg-teal-700 hover:text-white"
+        title="Importa ordini"
+        class="flex min-h-11 items-center gap-3 rounded-md px-3 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-teal-50 hover:text-teal-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-700"
+        (click)="closeMobileNav()"
+      >
+        <i class="pi pi-file-pdf"></i>
+        <span>Importa ordini</span>
+      </a>
+    }
+    @if (auth.canUpload('invoices')) {
+      <a
+        routerLink="/uploads/invoices"
+        routerLinkActive="bg-teal-700 text-white hover:bg-teal-700 hover:text-white"
+        title="Importa fatture"
+        class="flex min-h-11 items-center gap-3 rounded-md px-3 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-teal-50 hover:text-teal-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-700"
+        (click)="closeMobileNav()"
+      >
+        <i class="pi pi-receipt"></i>
+        <span>Importa fatture</span>
+      </a>
+    }
+    @if (auth.canUpload('payments')) {
+      <a
+        routerLink="/uploads/payments"
+        routerLinkActive="bg-teal-700 text-white hover:bg-teal-700 hover:text-white"
+        title="Importa pagamenti"
+        class="flex min-h-11 items-center gap-3 rounded-md px-3 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-teal-50 hover:text-teal-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-700"
+        (click)="closeMobileNav()"
+      >
+        <i class="pi pi-file-excel"></i>
+        <span>Importa pagamenti</span>
+      </a>
+    }
+    @if (auth.isAdmin()) {
+      <a
+        routerLink="/users"
+        routerLinkActive="bg-teal-700 text-white hover:bg-teal-700 hover:text-white"
+        title="Utenti"
+        class="flex min-h-11 items-center gap-3 rounded-md px-3 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-teal-50 hover:text-teal-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-700"
+        (click)="closeMobileNav()"
+      >
+        <i class="pi pi-users"></i>
+        <span>Utenti</span>
+      </a>
+    }
+  </nav>
+
+  <div class="mt-auto border-t border-slate-200 p-3">
+    <div class="mb-2 min-w-0 px-1 text-xs text-slate-500">
+      <p class="truncate font-semibold text-slate-700">{{ auth.currentUser()?.fullName }}</p>
+      <p class="truncate">{{ auth.currentUser()?.email }}</p>
+    </div>
+    <button
+      type="button"
+      class="flex min-h-11 w-full cursor-pointer items-center gap-3 rounded-md px-3 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-700"
+      (click)="logout()"
+    >
+      <i class="pi pi-sign-out"></i>
+      <span>Esci</span>
+    </button>
+  </div>
+</aside>

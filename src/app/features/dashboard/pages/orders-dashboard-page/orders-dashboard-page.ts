@@ -5,7 +5,7 @@ import { MessageService } from 'primeng/api';
 import { ButtonModule } from 'primeng/button';
 import { DialogModule } from 'primeng/dialog';
 import { TagModule } from 'primeng/tag';
-import { finalize, forkJoin } from 'rxjs';
+import { finalize, forkJoin, of } from 'rxjs';
 
 import {
   OrderListItem,
@@ -14,6 +14,7 @@ import {
   PaymentStatus,
   UpdateOrderRequest,
 } from '../../../../core/models/order.models';
+import { AuthService } from '../../../../core/services/auth.service';
 import { InvoicesService } from '../../../../core/services/invoices.service';
 import { OrdersService } from '../../../../core/services/orders.service';
 
@@ -27,6 +28,7 @@ type OrderEditForm = Record<keyof UpdateOrderRequest, string>;
 export class OrdersDashboardPage implements OnInit {
   private readonly ordersService = inject(OrdersService);
   private readonly invoicesService = inject(InvoicesService);
+  private readonly auth = inject(AuthService);
   private readonly messages = inject(MessageService);
 
   protected readonly orders = signal<OrderListItem[]>([]);
@@ -75,15 +77,17 @@ export class OrdersDashboardPage implements OnInit {
   protected loadOrders(): void {
     this.loading.set(true);
 
+    // Only request the sections the user is allowed to view, so a limited
+    // non-admin lands on the dashboard without hitting 403s.
     forkJoin({
-      orders: this.ordersService.getOrders(0, this.size()),
-      invoices: this.invoicesService.getInvoices(0, 1),
+      orders: this.auth.canView('orders') ? this.ordersService.getOrders(0, this.size()) : of(null),
+      invoices: this.auth.canView('invoices') ? this.invoicesService.getInvoices(0, 1) : of(null),
     })
       .pipe(finalize(() => this.loading.set(false)))
       .subscribe({
         next: ({ orders, invoices }) => {
           this.applyPageResponse(orders);
-          this.totalInvoices.set(invoices.totalItems);
+          this.totalInvoices.set(invoices?.totalItems ?? 0);
         },
         error: (error: HttpErrorResponse) => {
           if (error.status === 404) {
