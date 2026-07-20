@@ -8,28 +8,29 @@ import {
   UpdateUserPermissionsRequest,
   UpdateUserRoleRequest,
 } from '../models/auth.models';
+import { environment } from '../../../environments/environment';
 
 @Injectable({ providedIn: 'root' })
 export class UsersService {
   private readonly http = inject(HttpClient);
 
   getUsers(): Observable<AuthUser[]> {
-    return this.http.get<AuthUser[]>('/api/users');
+    return this.http.get<AuthUser[]>(`${environment.apiBaseUrl}/users`);
   }
 
   createUser(request: CreateUserRequest): Observable<AuthUser> {
-    return this.http.post<AuthUser>('/api/users', request);
+    return this.http.post<AuthUser>(`${environment.apiBaseUrl}/users`, request);
   }
 
   updateRole(id: number, request: UpdateUserRoleRequest): Observable<AuthUser> {
-    return this.http.put<AuthUser>(`/api/users/${id}/role`, request);
+    return this.http.put<AuthUser>(`${environment.apiBaseUrl}/users/${id}/role`, request);
   }
 
   updatePermissions(id: number, request: UpdateUserPermissionsRequest): Observable<AuthUser> {
-    return this.http.put<AuthUser>(`/api/users/${id}/permissions`, request);
+    return this.http.put<AuthUser>(`${environment.apiBaseUrl}/users/${id}/permissions`, request);
   }
 
   deleteUser(id: number): Observable<void> {
-    return this.http.delete<void>(`/api/users/${id}`);
+    return this.http.delete<void>(`${environment.apiBaseUrl}/users/${id}`);
   }
 }

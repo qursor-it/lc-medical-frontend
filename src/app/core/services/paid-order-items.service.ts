@@ -3,6 +3,7 @@ import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 
 import { PaidOrderItemsPageResponse } from '../models/paid-order-item.models';
+import { environment } from '../../../environments/environment';
 
 @Injectable({ providedIn: 'root' })
 export class PaidOrderItemsService {
@@ -24,6 +25,6 @@ export class PaidOrderItemsService {
       params = params.set('month', month);
     }
 
-    return this.http.get<PaidOrderItemsPageResponse>('/api/paid-order-items', { params });
+    return this.http.get<PaidOrderItemsPageResponse>(`${environment.apiBaseUrl}/paid-order-items`, { params });
   }
 }

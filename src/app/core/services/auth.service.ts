@@ -3,6 +3,7 @@ import { computed, inject, Injectable, signal } from '@angular/core';
 import { Observable, tap } from 'rxjs';
 
 import { AuthResponse, AuthUser, LoginRequest, PermissionSection } from '../models/auth.models';
+import { environment } from '../../../environments/environment';
 
 interface AuthSession extends AuthResponse {}
 
@@ -55,7 +56,7 @@ export class AuthService {
   }
 
   login(request: LoginRequest): Observable<AuthResponse> {
-    return this.http.post<AuthResponse>('/api/auth/login', request).pipe(
+    return this.http.post<AuthResponse>(`${environment.apiBaseUrl}/auth/login`, request).pipe(
       tap((response) => {
         this.session.set(response);
         localStorage.setItem(this.storageKey, JSON.stringify(response));

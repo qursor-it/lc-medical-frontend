@@ -3,6 +3,7 @@ import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 
 import { InvoiceDetail, InvoicePageResponse, UpdateInvoiceRequest } from '../models/invoice.models';
+import { environment } from '../../../environments/environment';
 
 @Injectable({ providedIn: 'root' })
 export class InvoicesService {
@@ -25,18 +26,18 @@ export class InvoicesService {
       params = params.set('month', month);
     }
 
-    return this.http.get<InvoicePageResponse>('/api/invoices', { params });
+    return this.http.get<InvoicePageResponse>(`${environment.apiBaseUrl}/invoices`, { params });
   }
 
   getInvoiceDetail(id: number): Observable<InvoiceDetail> {
-    return this.http.get<InvoiceDetail>(`/api/invoices/${id}`);
+    return this.http.get<InvoiceDetail>(`${environment.apiBaseUrl}/invoices/${id}`);
   }
 
   updateInvoice(id: number, request: UpdateInvoiceRequest): Observable<InvoiceDetail> {
-    return this.http.put<InvoiceDetail>(`/api/invoices/${id}`, request);
+    return this.http.put<InvoiceDetail>(`${environment.apiBaseUrl}/invoices/${id}`, request);
   }
 
   deleteInvoice(id: number): Observable<void> {
-    return this.http.delete<void>(`/api/invoices/${id}`);
+    return this.http.delete<void>(`${environment.apiBaseUrl}/invoices/${id}`);
   }
 }

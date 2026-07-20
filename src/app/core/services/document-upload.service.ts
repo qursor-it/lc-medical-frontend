@@ -3,6 +3,7 @@ import { inject, Injectable } from '@angular/core';
 import { catchError, forkJoin, map, Observable, of } from 'rxjs';
 
 import { BatchUploadResult, PaidOrderItemsImportResult, UploadKind } from '../models/upload.models';
+import { environment } from '../../../environments/environment';
 
 @Injectable({ providedIn: 'root' })
 export class DocumentUploadService {
@@ -16,7 +17,7 @@ export class DocumentUploadService {
     const formData = new FormData();
     files.forEach((file) => formData.append('file', file, file.name));
 
-    return this.http.post<BatchUploadResult[]>(`/api/${kind}/ingest/batch`, formData);
+    return this.http.post<BatchUploadResult[]>(`${environment.apiBaseUrl}/${kind}/ingest/batch`, formData);
   }
 
   private uploadPaidOrderItems(files: File[]): Observable<BatchUploadResult[]> {
@@ -34,7 +35,7 @@ export class DocumentUploadService {
     formData.append('file', file, file.name);
 
     return this.http
-      .post<PaidOrderItemsImportResult>('/api/paid-order-items/ingest', formData)
+      .post<PaidOrderItemsImportResult>(`${environment.apiBaseUrl}/paid-order-items/ingest`, formData)
       .pipe(
         map((result) => ({
           fileName: result.fileName || file.name,

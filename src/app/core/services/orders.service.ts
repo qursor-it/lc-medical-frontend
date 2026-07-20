@@ -8,6 +8,7 @@ import {
   PageResponse,
   UpdateOrderRequest,
 } from '../models/order.models';
+import { environment } from '../../../environments/environment';
 
 @Injectable({ providedIn: 'root' })
 export class OrdersService {
@@ -35,18 +36,18 @@ export class OrdersService {
       params = params.set('paymentStatus', paymentStatus);
     }
 
-    return this.http.get<PageResponse<OrderListItem>>('/api/orders', { params });
+    return this.http.get<PageResponse<OrderListItem>>(`${environment.apiBaseUrl}/orders`, { params });
   }
 
   getOrderDetail(id: number): Observable<OrderPaymentStatusResponse> {
-    return this.http.get<OrderPaymentStatusResponse>(`/api/orders/${id}`);
+    return this.http.get<OrderPaymentStatusResponse>(`${environment.apiBaseUrl}/orders/${id}`);
   }
 
   updateOrder(id: number, request: UpdateOrderRequest): Observable<OrderPaymentStatusResponse> {
-    return this.http.put<OrderPaymentStatusResponse>(`/api/orders/${id}`, request);
+    return this.http.put<OrderPaymentStatusResponse>(`${environment.apiBaseUrl}/orders/${id}`, request);
   }
 
   deleteOrder(id: number): Observable<void> {
-    return this.http.delete<void>(`/api/orders/${id}`);
+    return this.http.delete<void>(`${environment.apiBaseUrl}/orders/${id}`);
   }
 }
