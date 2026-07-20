@@ -1,0 +1,8 @@
+services:
+  lc-medical-frontend-dev:
+    build: .
+    container_name: lc-medical-frontend-dev
+    image: lc-medical-frontend-dev
+    ports:
+      - "4321:80"
+    restart: unless-stopped
