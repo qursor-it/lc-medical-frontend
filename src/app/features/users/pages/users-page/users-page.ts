@@ -60,6 +60,11 @@ export class UsersPage implements OnInit {
   protected readonly permissionsDraft = signal<UserPermissions>({ ...EMPTY_PERMISSIONS });
   protected readonly permissionsSaving = signal(false);
 
+  protected readonly resetPasswordUser = signal<AuthUser | null>(null);
+  protected readonly resetPasswordValue = signal('');
+  protected readonly resetPasswordConfirm = signal('');
+  protected readonly resetPasswordSaving = signal(false);
+
   protected readonly permissionSections: {
     label: string;
     icon: string;
@@ -243,6 +248,59 @@ export class UsersPage implements OnInit {
       },
       error: (error: HttpErrorResponse) => this.showError('Utente non eliminato', error),
     });
+  }
+
+  protected openResetPassword(user: AuthUser): void {
+    this.resetPasswordUser.set(user);
+    this.resetPasswordValue.set('');
+    this.resetPasswordConfirm.set('');
+  }
+
+  protected closeResetPassword(): void {
+    this.resetPasswordUser.set(null);
+  }
+
+  protected updateResetPasswordValue(event: Event): void {
+    this.resetPasswordValue.set((event.target as HTMLInputElement).value);
+  }
+
+  protected updateResetPasswordConfirm(event: Event): void {
+    this.resetPasswordConfirm.set((event.target as HTMLInputElement).value);
+  }
+
+  protected submitResetPassword(): void {
+    const user = this.resetPasswordUser();
+    if (!user) {
+      return;
+    }
+    if (this.resetPasswordValue().length < 8) {
+      this.messages.add({
+        severity: 'warn',
+        summary: 'Password troppo corta',
+        detail: 'La nuova password deve avere almeno 8 caratteri.',
+      });
+      return;
+    }
+    if (this.resetPasswordValue() !== this.resetPasswordConfirm()) {
+      this.messages.add({
+        severity: 'warn',
+        summary: 'Le password non coincidono',
+        detail: 'La conferma non corrisponde alla nuova password.',
+      });
+      return;
+    }
+
+    this.resetPasswordSaving.set(true);
+    this.usersService
+      .resetPassword(user.id, this.resetPasswordValue())
+      .pipe(finalize(() => this.resetPasswordSaving.set(false)))
+      .subscribe({
+        next: () => {
+          this.closeResetPassword();
+          this.messages.add({ severity: 'success', summary: 'Password reimpostata' });
+        },
+        error: (error: HttpErrorResponse) => this.showError('Password non reimpostata', error),
+      });
   }
 
   protected updateEmail(event: Event): void {

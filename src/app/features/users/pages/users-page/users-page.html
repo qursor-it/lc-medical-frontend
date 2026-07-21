@@ -120,6 +120,15 @@
               <button
                 pButton
                 type="button"
+                icon="pi pi-key"
+                label="Password"
+                severity="secondary"
+                size="small"
+                (click)="openResetPassword(user)"
+              ></button>
+              <button
+                pButton
+                type="button"
                 icon="pi pi-trash"
                 label="Elimina"
                 severity="danger"
@@ -306,4 +315,62 @@
       ></button>
     </div>
   }
+</p-dialog>
+
+<p-dialog
+  appendTo="body"
+  [visible]="resetPasswordUser() !== null"
+  [modal]="true"
+  [style]="{ width: 'min(28rem, calc(100vw - 2rem))' }"
+  [header]="'Reimposta password · ' + (resetPasswordUser()?.fullName ?? '')"
+  (onHide)="closeResetPassword()"
+>
+  <form class="space-y-3" (submit)="$event.preventDefault(); submitResetPassword()">
+    <div>
+      <label class="text-sm font-medium text-slate-700" for="reset-password-value">
+        Nuova password
+      </label>
+      <input
+        id="reset-password-value"
+        type="password"
+        [class]="inputClass()"
+        [value]="resetPasswordValue()"
+        [disabled]="resetPasswordSaving()"
+        (input)="updateResetPasswordValue($event)"
+      />
+      <p class="mt-1 text-xs text-slate-500">Almeno 8 caratteri.</p>
+    </div>
+
+    <div>
+      <label class="text-sm font-medium text-slate-700" for="reset-password-confirm">
+        Conferma nuova password
+      </label>
+      <input
+        id="reset-password-confirm"
+        type="password"
+        [class]="inputClass()"
+        [value]="resetPasswordConfirm()"
+        [disabled]="resetPasswordSaving()"
+        (input)="updateResetPasswordConfirm($event)"
+      />
+    </div>
+
+    <div class="mt-5 flex justify-end gap-2">
+      <button
+        pButton
+        type="button"
+        label="Annulla"
+        severity="secondary"
+        [disabled]="resetPasswordSaving()"
+        (click)="closeResetPassword()"
+      ></button>
+      <button
+        pButton
+        type="submit"
+        icon="pi pi-check"
+        label="Salva"
+        [loading]="resetPasswordSaving()"
+      ></button>
+    </div>
+  </form>
 </p-dialog>
