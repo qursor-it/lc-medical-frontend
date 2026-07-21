@@ -50,6 +50,7 @@ export class InvoicesListPage implements OnInit {
     return total === 1 ? '1 risultato' : `${total} risultati`;
   });
   protected readonly hasSearch = computed(() => this.appliedSearch().length > 0);
+  protected readonly monthLabel = computed(() => this.formatMonthLabel(this.monthDate()));
 
   ngOnInit(): void {
     this.loadInvoices();
@@ -242,6 +243,17 @@ export class InvoicesListPage implements OnInit {
       style: 'currency',
       currency: 'EUR',
     }).format(value);
+  }
+
+  private formatMonthLabel(date: Date | null): string {
+    if (!date) {
+      return '';
+    }
+
+    const label = new Intl.DateTimeFormat('it-IT', { month: 'long', year: 'numeric' }).format(
+      date,
+    );
+    return label.charAt(0).toUpperCase() + label.slice(1);
   }
 
   protected detailSerialsCount(invoice: InvoiceDetail): number {

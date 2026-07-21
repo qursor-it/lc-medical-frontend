@@ -48,6 +48,7 @@ export class PaymentsListPage implements OnInit {
     return total === 1 ? '1 pagamento' : `${total} pagamenti`;
   });
   protected readonly hasSearch = computed(() => this.appliedSearch().length > 0);
+  protected readonly monthLabel = computed(() => this.formatMonthLabel(this.monthDate()));
   protected readonly pageOrders = computed(
     () => new Set(this.payments().map((payment) => payment.orderNumber)).size,
   );
@@ -134,6 +135,17 @@ export class PaymentsListPage implements OnInit {
     return new Intl.NumberFormat('it-IT', {
       maximumFractionDigits: 2,
     }).format(value);
+  }
+
+  private formatMonthLabel(date: Date | null): string {
+    if (!date) {
+      return '';
+    }
+
+    const label = new Intl.DateTimeFormat('it-IT', { month: 'long', year: 'numeric' }).format(
+      date,
+    );
+    return label.charAt(0).toUpperCase() + label.slice(1);
   }
 
   private applyPageResponse(response: PaidOrderItemsPageResponse | null): void {
