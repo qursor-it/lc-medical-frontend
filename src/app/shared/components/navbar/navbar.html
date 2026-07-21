@@ -171,6 +171,14 @@
     <button
       type="button"
       class="flex min-h-11 w-full cursor-pointer items-center gap-3 rounded-md px-3 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-700"
+      (click)="openChangePassword()"
+    >
+      <i class="pi pi-key"></i>
+      <span>Cambia password</span>
+    </button>
+    <button
+      type="button"
+      class="flex min-h-11 w-full cursor-pointer items-center gap-3 rounded-md px-3 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-700"
       (click)="logout()"
     >
       <i class="pi pi-sign-out"></i>
@@ -178,3 +186,73 @@
     </button>
   </div>
 </aside>
+
+<p-dialog
+  appendTo="body"
+  header="Cambia password"
+  [modal]="true"
+  [visible]="changePasswordVisible()"
+  [style]="{ width: 'min(28rem, calc(100vw - 2rem))' }"
+  (onHide)="closeChangePassword()"
+>
+  <form class="space-y-3" (submit)="$event.preventDefault(); submitChangePassword()">
+    <div>
+      <label class="text-sm font-medium text-slate-700" for="current-password">
+        Password attuale
+      </label>
+      <input
+        id="current-password"
+        type="password"
+        [class]="inputClass()"
+        [value]="currentPassword()"
+        [disabled]="changePasswordSaving()"
+        (input)="updateCurrentPassword($event)"
+      />
+    </div>
+
+    <div>
+      <label class="text-sm font-medium text-slate-700" for="new-password">Nuova password</label>
+      <input
+        id="new-password"
+        type="password"
+        [class]="inputClass()"
+        [value]="newPassword()"
+        [disabled]="changePasswordSaving()"
+        (input)="updateNewPassword($event)"
+      />
+      <p class="mt-1 text-xs text-slate-500">Almeno 8 caratteri.</p>
+    </div>
+
+    <div>
+      <label class="text-sm font-medium text-slate-700" for="confirm-password">
+        Conferma nuova password
+      </label>
+      <input
+        id="confirm-password"
+        type="password"
+        [class]="inputClass()"
+        [value]="confirmPassword()"
+        [disabled]="changePasswordSaving()"
+        (input)="updateConfirmPassword($event)"
+      />
+    </div>
+
+    <div class="mt-5 flex justify-end gap-2">
+      <button
+        pButton
+        type="button"
+        label="Annulla"
+        severity="secondary"
+        [disabled]="changePasswordSaving()"
+        (click)="closeChangePassword()"
+      ></button>
+      <button
+        pButton
+        type="submit"
+        icon="pi pi-check"
+        label="Salva"
+        [loading]="changePasswordSaving()"
+      ></button>
+    </div>
+  </form>
+</p-dialog>
