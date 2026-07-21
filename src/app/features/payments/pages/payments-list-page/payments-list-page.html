@@ -278,6 +278,7 @@
 
     <div class="border-t border-slate-200">
       <p-paginator
+        appendTo="body"
         [class.pointer-events-none]="loading()"
         [class.opacity-60]="loading()"
         [first]="page() * size()"
