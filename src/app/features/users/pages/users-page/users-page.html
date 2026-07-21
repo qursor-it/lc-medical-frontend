@@ -158,6 +158,7 @@
   [modal]="true"
   [visible]="createVisible()"
   [style]="{ width: 'min(32rem, calc(100vw - 2rem))' }"
+  (visibleChange)="createVisible.set($event)"
   (onHide)="closeCreate()"
 >
   <form class="space-y-3" (submit)="$event.preventDefault(); createUser()">
@@ -234,6 +235,7 @@
   [modal]="true"
   [style]="{ width: 'min(30rem, calc(100vw - 2rem))' }"
   [header]="'Permessi · ' + (permissionsUser()?.fullName ?? '')"
+  (visibleChange)="closePermissions()"
   (onHide)="closePermissions()"
 >
   @if (permissionsUser(); as user) {
@@ -323,6 +325,7 @@
   [modal]="true"
   [style]="{ width: 'min(28rem, calc(100vw - 2rem))' }"
   [header]="'Reimposta password · ' + (resetPasswordUser()?.fullName ?? '')"
+  (visibleChange)="closeResetPassword()"
   (onHide)="closeResetPassword()"
 >
   <form class="space-y-3" (submit)="$event.preventDefault(); submitResetPassword()">

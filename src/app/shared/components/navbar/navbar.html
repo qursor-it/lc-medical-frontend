@@ -194,6 +194,7 @@
   [modal]="true"
   [visible]="changePasswordVisible()"
   [style]="{ width: 'min(28rem, calc(100vw - 2rem))' }"
+  (visibleChange)="changePasswordVisible.set($event)"
   (onHide)="closeChangePassword()"
 >
   <form class="space-y-3" (submit)="$event.preventDefault(); submitChangePassword()">
