@@ -350,6 +350,7 @@ export class OrdersListPage implements OnInit {
               clientCode: detail.order.clientCode,
               paid: detail.paid,
               paymentStatus: detail.paymentStatus,
+              commissionAmount: detail.commissionAmount,
             }
           : item,
       ),

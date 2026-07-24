@@ -16,12 +16,17 @@ export interface OrderListItem {
   clientCode: string | null;
   paid: boolean;
   paymentStatus: PaymentStatus;
+  commissionAmount: number | null;
 }
 
 export interface OrderPaymentStatusResponse {
   order: OrderSummary;
   paid: boolean;
   paymentStatus: PaymentStatus;
+  paidAt: string | null;
+  paidAmount: number | null;
+  commissionRatePercent: number | null;
+  commissionAmount: number | null;
   invoices: InvoiceSummary[];
   paidOrderItems: PaidOrderItemSummary[];
 }

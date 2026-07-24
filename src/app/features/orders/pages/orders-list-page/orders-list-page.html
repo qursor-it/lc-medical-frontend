@@ -155,6 +155,7 @@
           <th>Ordine</th>
           <th>Cliente</th>
           <th>Pagamento</th>
+          <th>Provvigione</th>
           <th class="w-14"></th>
         </tr>
       </ng-template>
@@ -170,6 +171,7 @@
                 </div>
               </div>
             </td>
+            <td><span class="skeleton-pill"></span></td>
             <td><span class="skeleton-pill"></span></td>
             <td><span class="skeleton-pill"></span></td>
             <td class="text-right"><span class="skeleton-line ml-auto w-4"></span></td>
@@ -205,6 +207,15 @@
                 [value]="paymentStatusLabel(row.paymentStatus)"
               />
             </td>
+            <td data-label="Provvigione">
+              @if (row.commissionAmount) {
+                <span class="font-semibold text-slate-900">{{
+                  formatCurrency(row.commissionAmount)
+                }}</span>
+              } @else {
+                <span class="text-slate-400">—</span>
+              }
+            </td>
             <td class="mobile-card-icon text-right text-slate-400">
               <i class="pi pi-angle-right"></i>
             </td>
@@ -213,7 +224,7 @@
       </ng-template>
       <ng-template pTemplate="emptymessage">
         <tr>
-          <td colspan="4" class="py-10 text-center text-sm text-slate-500">
+          <td colspan="5" class="py-10 text-center text-sm text-slate-500">
             Nessun ordine disponibile.
           </td>
         </tr>
@@ -277,6 +288,28 @@
                   </span>
                 }
               </div>
+              @if (detail.paidAt || detail.commissionAmount) {
+                <div class="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-slate-600">
+                  @if (detail.paidAt) {
+                    <span class="inline-flex items-center gap-1">
+                      <i class="pi pi-calendar text-slate-400"></i>
+                      Pagato il {{ detail.paidAt }}
+                    </span>
+                  }
+                  @if (detail.commissionAmount) {
+                    <span class="inline-flex flex-wrap items-center gap-1">
+                      <i class="pi pi-percentage text-slate-400"></i>
+                      <span>Provvigione ({{ formatNumber(detail.commissionRatePercent) }}%):</span>
+                      <strong class="font-semibold text-slate-900">{{
+                        formatCurrency(detail.commissionAmount)
+                      }}</strong>
+                      @if (detail.paidAmount) {
+                        <span class="text-slate-400">su {{ formatCurrency(detail.paidAmount) }}</span>
+                      }
+                    </span>
+                  }
+                </div>
+              }
             </div>
 
             <div class="flex flex-col gap-2 sm:flex-row sm:items-center">

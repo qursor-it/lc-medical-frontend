@@ -1,0 +1,78 @@
+<section class="mx-auto w-full max-w-2xl px-4 py-6">
+  <header class="mb-5">
+    <h1 class="text-lg font-semibold text-slate-950">Impostazioni</h1>
+    <p class="mt-1 text-sm text-slate-500">
+      Parametri usati per il calcolo automatico delle provvigioni sugli ordini pagati.
+    </p>
+  </header>
+
+  <div class="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+    <form class="space-y-4" (submit)="$event.preventDefault(); save()">
+      <div>
+        <label class="text-sm font-medium text-slate-700" for="commission-base">
+          Base di calcolo provvigione
+        </label>
+        <p-select
+          inputId="commission-base"
+          styleClass="mt-1 w-full"
+          [options]="commissionBaseOptions"
+          optionLabel="label"
+          optionValue="value"
+          [ngModel]="commissionBase()"
+          [ngModelOptions]="{ standalone: true }"
+          [disabled]="loading() || saving()"
+          (ngModelChange)="commissionBase.set($event)"
+        ></p-select>
+        <p class="mt-1 text-xs text-slate-500">
+          Netto = provvigione sull'imponibile. Lordo = provvigione sull'importo IVA inclusa.
+        </p>
+      </div>
+
+      <div>
+        <label class="text-sm font-medium text-slate-700" for="commission-rate">
+          Percentuale provvigione (%)
+        </label>
+        <input
+          id="commission-rate"
+          type="number"
+          min="0"
+          max="100"
+          step="0.01"
+          [class]="inputClass()"
+          [value]="commissionRatePercent()"
+          [disabled]="loading() || saving()"
+          (input)="updateRate($event)"
+        />
+      </div>
+
+      <div [class.opacity-50]="!isGross()">
+        <label class="text-sm font-medium text-slate-700" for="vat-rate">Aliquota IVA (%)</label>
+        <input
+          id="vat-rate"
+          type="number"
+          min="0"
+          max="100"
+          step="0.01"
+          [class]="inputClass()"
+          [value]="vatRatePercent()"
+          [disabled]="loading() || saving()"
+          (input)="updateVat($event)"
+        />
+        <p class="mt-1 text-xs text-slate-500">
+          Usata solo con base "Lordo", per aggiungere l'IVA all'imponibile dei pagamenti.
+        </p>
+      </div>
+
+      <div class="flex justify-end pt-2">
+        <button
+          pButton
+          type="submit"
+          icon="pi pi-check"
+          label="Salva impostazioni"
+          [loading]="saving()"
+          [disabled]="loading()"
+        ></button>
+      </div>
+    </form>
+  </div>
+</section>

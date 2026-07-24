@@ -82,6 +82,13 @@ export const routes: Routes = [
       import('./features/users/pages/users-page/users-page').then((m) => m.UsersPage),
   },
   {
+    path: 'settings',
+    title: 'Impostazioni · Lc Medical',
+    canActivate: [authGuard, adminGuard],
+    loadComponent: () =>
+      import('./features/settings/pages/settings-page/settings-page').then((m) => m.SettingsPage),
+  },
+  {
     path: '**',
     redirectTo: 'dashboard',
   },

@@ -239,6 +239,28 @@
                   </span>
                 }
               </div>
+              @if (detail.paidAt || detail.commissionAmount) {
+                <div class="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-slate-600">
+                  @if (detail.paidAt) {
+                    <span class="inline-flex items-center gap-1">
+                      <i class="pi pi-calendar text-slate-400"></i>
+                      Pagato il {{ detail.paidAt }}
+                    </span>
+                  }
+                  @if (detail.commissionAmount) {
+                    <span class="inline-flex flex-wrap items-center gap-1">
+                      <i class="pi pi-percentage text-slate-400"></i>
+                      <span>Provvigione ({{ formatNumber(detail.commissionRatePercent) }}%):</span>
+                      <strong class="font-semibold text-slate-900">{{
+                        formatCurrency(detail.commissionAmount)
+                      }}</strong>
+                      @if (detail.paidAmount) {
+                        <span class="text-slate-400">su {{ formatCurrency(detail.paidAmount) }}</span>
+                      }
+                    </span>
+                  }
+                </div>
+              }
             </div>
 
             <div class="flex flex-col gap-2 sm:flex-row sm:items-center">
