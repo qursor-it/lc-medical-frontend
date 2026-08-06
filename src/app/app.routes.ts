@@ -65,6 +65,15 @@ export const routes: Routes = [
       import('./features/users/pages/users-page/users-page').then((m) => m.UsersPage),
   },
   {
+    path: 'agent-commissions',
+    title: 'Compensi agenti · Lc Medical',
+    canActivate: [authGuard, adminGuard],
+    loadComponent: () =>
+      import(
+        './features/agent-commissions/pages/agent-commissions-page/agent-commissions-page'
+      ).then((m) => m.AgentCommissionsPage),
+  },
+  {
     path: 'settings',
     title: 'Impostazioni · Lc Medical',
     canActivate: [authGuard, adminGuard],

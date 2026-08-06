@@ -311,6 +311,14 @@
                 {{ detail.order.surgeryDate || '-' }}
               </p>
             </div>
+            @if (isAdmin()) {
+              <div class="col-span-2 rounded-md border border-slate-200 bg-white px-3 py-2">
+                <p class="text-xs text-slate-500">Caricato da</p>
+                <p class="mt-0.5 truncate font-semibold text-slate-950">
+                  {{ detail.uploadedByName || '-' }}
+                </p>
+              </div>
+            }
           </div>
         </div>
       </section>

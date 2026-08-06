@@ -17,6 +17,8 @@ export interface OrderListItem {
   paid: boolean;
   paymentStatus: PaymentStatus;
   commissionAmount: number | null;
+  uploadedByUserId: number | null;
+  uploadedByName: string | null;
 }
 
 export interface OrderPaymentStatusResponse {
@@ -29,6 +31,8 @@ export interface OrderPaymentStatusResponse {
   commissionAmount: number | null;
   invoices: InvoiceSummary[];
   paidOrderItems: PaidOrderItemSummary[];
+  uploadedByUserId: number | null;
+  uploadedByName: string | null;
 }
 
 export interface OrderSummary {
@@ -88,6 +92,23 @@ export interface InvoiceSummary {
   patient: string | null;
   representative: string | null;
   total: number | null;
+}
+
+export interface AgentCommissionSummary {
+  agentId: number | null;
+  agentName: string;
+  agentEmail: string | null;
+  orderCount: number;
+  paidAmount: number | null;
+  commissionAmount: number | null;
+}
+
+export interface CommissionSummaryResponse {
+  month: string | null;
+  agents: AgentCommissionSummary[];
+  totalOrders: number;
+  totalPaidAmount: number | null;
+  totalCommission: number | null;
 }
 
 export interface PaidOrderItemSummary {

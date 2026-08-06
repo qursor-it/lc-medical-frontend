@@ -3,6 +3,7 @@ import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 
 import {
+  CommissionSummaryResponse,
   OrderListItem,
   OrderPaymentStatusResponse,
   PageResponse,
@@ -41,6 +42,17 @@ export class OrdersService {
 
   getOrderDetail(id: number): Observable<OrderPaymentStatusResponse> {
     return this.http.get<OrderPaymentStatusResponse>(`${environment.apiBaseUrl}/orders/${id}`);
+  }
+
+  getCommissionSummary(month = ''): Observable<CommissionSummaryResponse> {
+    let params = new HttpParams();
+    if (month) {
+      params = params.set('month', month);
+    }
+    return this.http.get<CommissionSummaryResponse>(
+      `${environment.apiBaseUrl}/orders/commission-summary`,
+      { params },
+    );
   }
 
   updateOrder(id: number, request: UpdateOrderRequest): Observable<OrderPaymentStatusResponse> {

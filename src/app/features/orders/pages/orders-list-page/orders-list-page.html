@@ -154,6 +154,9 @@
         <tr>
           <th>Ordine</th>
           <th>Cliente</th>
+          @if (isAdmin()) {
+            <th>Agente</th>
+          }
           <th>Pagamento</th>
           <th>Provvigione</th>
           <th class="w-14"></th>
@@ -172,6 +175,9 @@
               </div>
             </td>
             <td><span class="skeleton-pill"></span></td>
+            @if (isAdmin()) {
+              <td><span class="skeleton-pill"></span></td>
+            }
             <td><span class="skeleton-pill"></span></td>
             <td><span class="skeleton-pill"></span></td>
             <td class="text-right"><span class="skeleton-line ml-auto w-4"></span></td>
@@ -201,6 +207,13 @@
                 <span class="cell-clip">{{ row.clientCode || '-' }}</span>
               </span>
             </td>
+            @if (isAdmin()) {
+              <td data-label="Agente">
+                <span class="cell-clip text-sm text-slate-700" [title]="row.uploadedByName || '-'">
+                  {{ row.uploadedByName || '-' }}
+                </span>
+              </td>
+            }
             <td data-label="Pagamento">
               <p-tag
                 [severity]="paymentStatusSeverity(row.paymentStatus)"
@@ -224,7 +237,7 @@
       </ng-template>
       <ng-template pTemplate="emptymessage">
         <tr>
-          <td colspan="5" class="py-10 text-center text-sm text-slate-500">
+          <td [attr.colspan]="isAdmin() ? 6 : 5" class="py-10 text-center text-sm text-slate-500">
             Nessun ordine disponibile.
           </td>
         </tr>
@@ -372,6 +385,14 @@
                 {{ detail.order.surgeryDate || '-' }}
               </p>
             </div>
+            @if (isAdmin()) {
+              <div class="col-span-2 rounded-md border border-slate-200 bg-white px-3 py-2">
+                <p class="text-xs text-slate-500">Caricato da</p>
+                <p class="mt-0.5 truncate font-semibold text-slate-950">
+                  {{ detail.uploadedByName || '-' }}
+                </p>
+              </div>
+            }
           </div>
         </div>
       </section>

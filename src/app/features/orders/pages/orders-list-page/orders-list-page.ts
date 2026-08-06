@@ -18,6 +18,7 @@ import {
   PaymentStatus,
   UpdateOrderRequest,
 } from '../../../../core/models/order.models';
+import { AuthService } from '../../../../core/services/auth.service';
 import { OrdersService } from '../../../../core/services/orders.service';
 
 type OrderEditForm = Record<keyof UpdateOrderRequest, string>;
@@ -39,7 +40,9 @@ type OrderEditForm = Record<keyof UpdateOrderRequest, string>;
 export class OrdersListPage implements OnInit {
   private readonly ordersService = inject(OrdersService);
   private readonly messages = inject(MessageService);
+  private readonly auth = inject(AuthService);
 
+  protected readonly isAdmin = this.auth.isAdmin;
   protected readonly orders = signal<OrderListItem[]>([]);
   protected readonly loading = signal(false);
   protected readonly detailLoading = signal(false);
@@ -343,6 +346,8 @@ export class OrdersListPage implements OnInit {
               paid: detail.paid,
               paymentStatus: detail.paymentStatus,
               commissionAmount: detail.commissionAmount,
+              uploadedByUserId: detail.uploadedByUserId,
+              uploadedByName: detail.uploadedByName,
             }
           : item,
       ),

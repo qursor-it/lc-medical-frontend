@@ -29,6 +29,8 @@ export class OrdersDashboardPage implements OnInit {
   private readonly auth = inject(AuthService);
   private readonly messages = inject(MessageService);
 
+  protected readonly isAdmin = this.auth.isAdmin;
+
   protected readonly orders = signal<OrderListItem[]>([]);
   protected readonly loading = signal(false);
   protected readonly lookupLoading = signal(false);
@@ -327,6 +329,8 @@ export class OrdersDashboardPage implements OnInit {
               paid: detail.paid,
               paymentStatus: detail.paymentStatus,
               commissionAmount: detail.commissionAmount,
+              uploadedByUserId: detail.uploadedByUserId,
+              uploadedByName: detail.uploadedByName,
             }
           : item,
       ),
