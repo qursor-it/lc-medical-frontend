@@ -259,14 +259,6 @@ export class OrdersListPage implements OnInit {
       });
   }
 
-  protected detailInvoiceNumbers(order: OrderPaymentStatusResponse): string {
-    const numbers = order.invoices
-      ?.map((invoice) => invoice.invoiceNumber)
-      .filter((invoiceNumber): invoiceNumber is string => Boolean(invoiceNumber));
-
-    return numbers?.length ? numbers.join(', ') : '-';
-  }
-
   protected formatCurrency(value: number | null): string {
     if (value == null) {
       return '-';

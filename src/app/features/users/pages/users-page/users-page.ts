@@ -72,7 +72,6 @@ export class UsersPage implements OnInit {
     upload: keyof UserPermissions;
   }[] = [
     { label: 'Ordini', icon: 'pi pi-list', view: 'canViewOrders', upload: 'canUploadOrders' },
-    { label: 'Fatture', icon: 'pi pi-table', view: 'canViewInvoices', upload: 'canUploadInvoices' },
     {
       label: 'Pagamenti',
       icon: 'pi pi-credit-card',
@@ -163,9 +162,6 @@ export class UsersPage implements OnInit {
     const sections: string[] = [];
     if (permissions.canViewOrders || permissions.canUploadOrders) {
       sections.push('Ordini');
-    }
-    if (permissions.canViewInvoices || permissions.canUploadInvoices) {
-      sections.push('Fatture');
     }
     if (permissions.canViewPayments || permissions.canUploadPayments) {
       sections.push('Pagamenti');

@@ -33,15 +33,6 @@ export const routes: Routes = [
       ),
   },
   {
-    path: 'invoices',
-    title: 'Fatture · Lc Medical',
-    canActivate: [authGuard, permissionGuard('invoices', 'view')],
-    loadComponent: () =>
-      import('./features/invoices/pages/invoices-list-page/invoices-list-page').then(
-        (m) => m.InvoicesListPage,
-      ),
-  },
-  {
     path: 'payments',
     title: 'Pagamenti · Lc Medical',
     canActivate: [authGuard, permissionGuard('payments', 'view')],
@@ -55,14 +46,6 @@ export const routes: Routes = [
     title: 'Importa ordini · Lc Medical',
     canActivate: [authGuard, permissionGuard('orders', 'upload')],
     data: { kind: 'orders' },
-    loadComponent: () =>
-      import('./features/uploads/pages/uploads-page/uploads-page').then((m) => m.UploadsPage),
-  },
-  {
-    path: 'uploads/invoices',
-    title: 'Importa fatture · Lc Medical',
-    canActivate: [authGuard, permissionGuard('invoices', 'upload')],
-    data: { kind: 'invoices' },
     loadComponent: () =>
       import('./features/uploads/pages/uploads-page/uploads-page').then((m) => m.UploadsPage),
   },

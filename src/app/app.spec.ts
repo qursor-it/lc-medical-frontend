@@ -49,7 +49,6 @@ describe('App', () => {
     expect(compiled.querySelector('nav')?.textContent).toContain('Dashboard');
     expect(compiled.querySelector('nav')?.textContent).toContain('Pagamenti');
     expect(compiled.querySelector('nav')?.textContent).toContain('Importa ordini');
-    expect(compiled.querySelector('nav')?.textContent).toContain('Importa fatture');
     expect(compiled.querySelector('nav')?.textContent).toContain('Importa pagamenti');
   });
 });

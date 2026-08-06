@@ -5,7 +5,7 @@ import { MessageService } from 'primeng/api';
 import { ButtonModule } from 'primeng/button';
 import { DialogModule } from 'primeng/dialog';
 import { TagModule } from 'primeng/tag';
-import { finalize, forkJoin, of } from 'rxjs';
+import { finalize, Observable, of } from 'rxjs';
 
 import {
   OrderListItem,
@@ -15,7 +15,6 @@ import {
   UpdateOrderRequest,
 } from '../../../../core/models/order.models';
 import { AuthService } from '../../../../core/services/auth.service';
-import { InvoicesService } from '../../../../core/services/invoices.service';
 import { OrdersService } from '../../../../core/services/orders.service';
 
 type OrderEditForm = Record<keyof UpdateOrderRequest, string>;
@@ -27,7 +26,6 @@ type OrderEditForm = Record<keyof UpdateOrderRequest, string>;
 })
 export class OrdersDashboardPage implements OnInit {
   private readonly ordersService = inject(OrdersService);
-  private readonly invoicesService = inject(InvoicesService);
   private readonly auth = inject(AuthService);
   private readonly messages = inject(MessageService);
 
@@ -44,7 +42,6 @@ export class OrdersDashboardPage implements OnInit {
   protected readonly editDraft = signal<OrderEditForm | null>(null);
   protected readonly size = signal(100);
   protected readonly totalItems = signal(0);
-  protected readonly totalInvoices = signal(0);
   protected readonly loadedItems = computed(() => this.orders().length);
   protected readonly paidOrders = computed(
     () => this.orders().filter((order) => this.paymentStatus(order) === 'PAID').length,
@@ -77,32 +74,25 @@ export class OrdersDashboardPage implements OnInit {
   protected loadOrders(): void {
     this.loading.set(true);
 
-    // Only request the sections the user is allowed to view, so a limited
+    // Only request orders if the user is allowed to view them, so a limited
     // non-admin lands on the dashboard without hitting 403s.
-    forkJoin({
-      orders: this.auth.canView('orders') ? this.ordersService.getOrders(0, this.size()) : of(null),
-      invoices: this.auth.canView('invoices') ? this.invoicesService.getInvoices(0, 1) : of(null),
-    })
+    const orders$: Observable<PageResponse<OrderListItem> | null> = this.auth.canView('orders')
+      ? this.ordersService.getOrders(0, this.size())
+      : of(null);
+
+    orders$
       .pipe(finalize(() => this.loading.set(false)))
       .subscribe({
-        next: ({ orders, invoices }) => {
-          this.applyPageResponse(orders);
-          this.totalInvoices.set(invoices?.totalItems ?? 0);
-        },
+        next: (orders) => this.applyPageResponse(orders),
         error: (error: HttpErrorResponse) => {
-          if (error.status === 404) {
-            this.applyPageResponse(null);
-            this.totalInvoices.set(0);
-            return;
-          }
-
           this.applyPageResponse(null);
-          this.totalInvoices.set(0);
-          this.messages.add({
-            severity: 'error',
-            summary: 'Dashboard non caricata',
-            detail: this.errorMessage(error),
-          });
+          if (error.status !== 404) {
+            this.messages.add({
+              severity: 'error',
+              summary: 'Dashboard non caricata',
+              detail: this.errorMessage(error),
+            });
+          }
         },
       });
   }
@@ -240,14 +230,6 @@ export class OrdersDashboardPage implements OnInit {
           });
         },
       });
-  }
-
-  protected detailInvoiceNumbers(order: OrderPaymentStatusResponse): string {
-    const numbers = order.invoices
-      ?.map((invoice) => invoice.invoiceNumber)
-      .filter((invoiceNumber): invoiceNumber is string => Boolean(invoiceNumber));
-
-    return numbers?.length ? numbers.join(', ') : '-';
   }
 
   protected formatCurrency(value: number | null): string {

@@ -89,18 +89,6 @@
         <span>Ordini</span>
       </a>
     }
-    @if (auth.canView('invoices')) {
-      <a
-        routerLink="/invoices"
-        routerLinkActive="bg-teal-700 text-white hover:bg-teal-700 hover:text-white"
-        title="Fatture"
-        class="flex min-h-11 items-center gap-3 rounded-md px-3 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-teal-50 hover:text-teal-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-700"
-        (click)="closeMobileNav()"
-      >
-        <i class="pi pi-table"></i>
-        <span>Fatture</span>
-      </a>
-    }
     @if (auth.canView('payments')) {
       <a
         routerLink="/payments"
@@ -123,18 +111,6 @@
       >
         <i class="pi pi-file-pdf"></i>
         <span>Importa ordini</span>
-      </a>
-    }
-    @if (auth.canUpload('invoices')) {
-      <a
-        routerLink="/uploads/invoices"
-        routerLinkActive="bg-teal-700 text-white hover:bg-teal-700 hover:text-white"
-        title="Importa fatture"
-        class="flex min-h-11 items-center gap-3 rounded-md px-3 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-teal-50 hover:text-teal-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-700"
-        (click)="closeMobileNav()"
-      >
-        <i class="pi pi-receipt"></i>
-        <span>Importa fatture</span>
       </a>
     }
     @if (auth.canUpload('payments')) {
