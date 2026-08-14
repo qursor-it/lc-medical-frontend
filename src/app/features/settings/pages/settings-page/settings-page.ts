@@ -6,7 +6,12 @@ import { ButtonModule } from 'primeng/button';
 import { SelectModule } from 'primeng/select';
 import { finalize } from 'rxjs';
 
-import { AppSettings, CommissionBase } from '../../../../core/models/settings.models';
+import {
+  AppSettings,
+  CommissionBase,
+  DangerCounts,
+  DangerDataset,
+} from '../../../../core/models/settings.models';
 import { SettingsService } from '../../../../core/services/settings.service';
 
 @Component({
@@ -32,8 +37,30 @@ export class SettingsPage implements OnInit {
     { label: 'Lordo (IVA inclusa)', value: 'GROSS' as CommissionBase },
   ];
 
+  protected readonly dangerCounts = signal<DangerCounts | null>(null);
+  protected readonly purging = signal<DangerDataset | null>(null);
+
+  protected readonly dangerDatasets: { key: DangerDataset; label: string; hint: string }[] = [
+    {
+      key: 'paid-order-items',
+      label: 'Pagamenti importati',
+      hint: 'Righe dei file commissioni Motiva. Ricaricabili dal file cumulativo.',
+    },
+    {
+      key: 'orders',
+      label: 'Ordini',
+      hint: 'Ordini caricati dagli agenti, incluse le righe articolo.',
+    },
+    {
+      key: 'invoices',
+      label: 'Fatture',
+      hint: 'Fatture importate, incluse le righe articolo.',
+    },
+  ];
+
   ngOnInit(): void {
     this.load();
+    this.loadDangerCounts();
   }
 
   protected load(): void {
@@ -86,6 +113,41 @@ export class SettingsPage implements OnInit {
 
   protected inputClass(): string {
     return 'mt-1 h-10 w-full rounded-md border border-slate-300 bg-white px-3 text-sm text-slate-900 outline-none transition focus:border-teal-600 focus:ring-2 focus:ring-teal-100';
+  }
+
+  protected purge(dataset: DangerDataset): void {
+    const item = this.dangerDatasets.find((d) => d.key === dataset);
+    const count = this.dangerCounts()?.[dataset] ?? 0;
+    if (
+      !window.confirm(
+        `Cancellare definitivamente ${count} record da "${item?.label}"? L'operazione non è reversibile.`,
+      )
+    ) {
+      return;
+    }
+
+    this.purging.set(dataset);
+    this.settingsService
+      .purgeDataset(dataset)
+      .pipe(finalize(() => this.purging.set(null)))
+      .subscribe({
+        next: (result) => {
+          this.messages.add({
+            severity: 'success',
+            summary: 'Dati cancellati',
+            detail: `Rimossi ${result.deletedItems} record da "${item?.label}".`,
+          });
+          this.loadDangerCounts();
+        },
+        error: (error: HttpErrorResponse) => this.showError('Cancellazione non riuscita', error),
+      });
+  }
+
+  private loadDangerCounts(): void {
+    this.settingsService.getDangerCounts().subscribe({
+      next: (counts) => this.dangerCounts.set(counts),
+      error: () => this.dangerCounts.set(null),
+    });
   }
 
   private apply(settings: AppSettings): void {
