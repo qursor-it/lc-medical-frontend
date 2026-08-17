@@ -7,7 +7,10 @@ import { DatePickerModule } from 'primeng/datepicker';
 import { TableModule } from 'primeng/table';
 import { finalize } from 'rxjs';
 
-import { CommissionSummaryResponse } from '../../../../core/models/order.models';
+import {
+  AgentCommissionSummary,
+  CommissionSummaryResponse,
+} from '../../../../core/models/order.models';
 import { OrdersService } from '../../../../core/services/orders.service';
 
 @Component({
@@ -22,8 +25,33 @@ export class AgentCommissionsPage implements OnInit {
   protected readonly loading = signal(false);
   protected readonly summary = signal<CommissionSummaryResponse | null>(null);
   protected readonly monthDate = signal<Date | null>(null);
+  protected readonly expandedAgent = signal<string | null>(null);
 
   protected readonly agents = computed(() => this.summary()?.agents ?? []);
+
+  protected toggleAgent(row: AgentCommissionSummary): void {
+    const key = this.agentKey(row);
+    this.expandedAgent.set(this.expandedAgent() === key ? null : key);
+  }
+
+  protected isExpanded(row: AgentCommissionSummary): boolean {
+    return this.expandedAgent() === this.agentKey(row);
+  }
+
+  protected formatMonth(value: string | null): string {
+    if (!value) {
+      return 'Mese non determinato';
+    }
+
+    const label = new Intl.DateTimeFormat('it-IT', { month: 'long', year: 'numeric' }).format(
+      new Date(`${value}-01`),
+    );
+    return label.charAt(0).toUpperCase() + label.slice(1);
+  }
+
+  private agentKey(row: AgentCommissionSummary): string {
+    return row.agentId != null ? String(row.agentId) : row.agentName;
+  }
 
   ngOnInit(): void {
     this.load();
@@ -49,6 +77,7 @@ export class AgentCommissionsPage implements OnInit {
 
   protected onMonthChange(value: Date | null): void {
     this.monthDate.set(value ?? null);
+    this.expandedAgent.set(null);
     this.load();
   }
 

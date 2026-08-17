@@ -79,13 +79,23 @@
         </tr>
       </ng-template>
       <ng-template pTemplate="body" let-row>
-        <tr>
+        <tr
+          class="cursor-pointer transition hover:bg-slate-50"
+          (click)="toggleAgent(row)"
+        >
           <td>
-            <div class="min-w-0">
-              <p class="font-semibold text-slate-950">{{ row.agentName }}</p>
-              @if (row.agentEmail) {
-                <p class="mt-0.5 text-xs text-slate-500">{{ row.agentEmail }}</p>
-              }
+            <div class="flex min-w-0 items-center gap-2">
+              <i
+                class="pi text-xs text-slate-400"
+                [class.pi-chevron-down]="isExpanded(row)"
+                [class.pi-chevron-right]="!isExpanded(row)"
+              ></i>
+              <div class="min-w-0">
+                <p class="font-semibold text-slate-950">{{ row.agentName }}</p>
+                @if (row.agentEmail) {
+                  <p class="mt-0.5 text-xs text-slate-500">{{ row.agentEmail }}</p>
+                }
+              </div>
             </div>
           </td>
           <td class="text-right text-slate-900">{{ row.orderCount }}</td>
@@ -94,6 +104,33 @@
             {{ formatCurrency(row.commissionAmount) }}
           </td>
         </tr>
+        @if (isExpanded(row)) {
+          <tr>
+            <td colspan="4" class="bg-slate-50 px-4 py-3">
+              <p class="mb-2 text-xs font-semibold uppercase tracking-[0.06em] text-slate-500">
+                Da pagare per mese di incasso
+              </p>
+              <table class="w-full text-sm">
+                <tbody>
+                  @for (monthRow of row.months; track monthRow.month) {
+                    <tr class="border-t border-slate-200 first:border-t-0">
+                      <td class="py-1.5 text-slate-800">{{ formatMonth(monthRow.month) }}</td>
+                      <td class="py-1.5 text-right text-slate-600">
+                        {{ monthRow.orderCount }} ordini
+                      </td>
+                      <td class="py-1.5 text-right text-slate-600">
+                        {{ formatCurrency(monthRow.paidAmount) }}
+                      </td>
+                      <td class="py-1.5 text-right font-semibold text-teal-700">
+                        {{ formatCurrency(monthRow.commissionAmount) }}
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </td>
+          </tr>
+        }
       </ng-template>
       <ng-template pTemplate="footer">
         @if (agents().length > 0) {
