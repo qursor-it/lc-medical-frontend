@@ -16,6 +16,11 @@ import {
 } from '../../../../core/models/order.models';
 import { AuthService } from '../../../../core/services/auth.service';
 import { OrdersService } from '../../../../core/services/orders.service';
+import {
+  lineStatusClass,
+  lineStatusLabel,
+  lineStatusTitle,
+} from '../../../../shared/line-status';
 
 type OrderEditForm = Record<keyof UpdateOrderRequest, string>;
 
@@ -233,6 +238,10 @@ export class OrdersDashboardPage implements OnInit {
         },
       });
   }
+
+  protected readonly lineStatusLabel = lineStatusLabel;
+  protected readonly lineStatusClass = lineStatusClass;
+  protected readonly lineStatusTitle = lineStatusTitle;
 
   protected formatPaidMonth(value: string | null): string {
     if (!value) {

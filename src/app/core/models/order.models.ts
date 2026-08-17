@@ -71,11 +71,16 @@ export interface UpdateOrderRequest {
   comments: string | null;
 }
 
+export type LinePaymentStatus = 'PAID' | 'PARTIAL' | 'CREDITED' | 'UNPAID';
+
 export interface OrderLineSummary {
   id: number;
   articolo: string | null;
   descrizione: string | null;
   quantita: number | null;
+  paidQuantity: number | null;
+  creditedQuantity: number | null;
+  lineStatus: LinePaymentStatus;
 }
 
 export interface InvoiceSummary {

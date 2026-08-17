@@ -599,12 +599,21 @@
           <div class="mt-3 overflow-hidden rounded-md border border-slate-200">
             @for (line of detail.order.lines; track line.id) {
               <div
-                class="grid gap-2 border-b border-slate-200 px-3 py-3 text-sm last:border-b-0 md:grid-cols-[9rem_minmax(0,1fr)_5rem] md:items-start"
+                class="grid gap-2 border-b border-slate-200 px-3 py-3 text-sm last:border-b-0 md:grid-cols-[9rem_minmax(0,1fr)_4rem_7rem] md:items-center"
               >
                 <div class="font-semibold text-slate-950">{{ line.articolo || '-' }}</div>
                 <div class="min-w-0 break-words text-slate-700">{{ line.descrizione || '-' }}</div>
                 <div class="font-medium text-slate-950 md:text-right">
                   {{ line.quantita ?? '-' }}
+                </div>
+                <div class="md:text-right">
+                  <span
+                    class="inline-flex items-center rounded-md border px-2 py-0.5 text-xs font-semibold"
+                    [class]="lineStatusClass(line.lineStatus)"
+                    [title]="lineStatusTitle(line)"
+                  >
+                    {{ lineStatusLabel(line.lineStatus) }}
+                  </span>
                 </div>
               </div>
             } @empty {

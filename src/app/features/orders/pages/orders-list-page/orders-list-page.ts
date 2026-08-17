@@ -18,6 +18,11 @@ import {
   PaymentStatus,
   UpdateOrderRequest,
 } from '../../../../core/models/order.models';
+import {
+  lineStatusClass,
+  lineStatusLabel,
+  lineStatusTitle,
+} from '../../../../shared/line-status';
 import { AuthService } from '../../../../core/services/auth.service';
 import { OrdersService } from '../../../../core/services/orders.service';
 
@@ -261,6 +266,10 @@ export class OrdersListPage implements OnInit {
         },
       });
   }
+
+  protected readonly lineStatusLabel = lineStatusLabel;
+  protected readonly lineStatusClass = lineStatusClass;
+  protected readonly lineStatusTitle = lineStatusTitle;
 
   protected formatPaidMonth(value: string | null): string {
     if (!value) {
