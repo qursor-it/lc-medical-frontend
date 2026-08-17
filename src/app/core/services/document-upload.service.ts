@@ -28,14 +28,29 @@ export class DocumentUploadService {
     return forkJoin(files.map((file) => this.uploadPaidOrderItemsFile(file)));
   }
 
+  /** Svuota e ricarica tutti i pagamenti dal file (transazione unica lato backend). */
+  reimportPaidOrderItems(file: File): Observable<BatchUploadResult<PaidOrderItemsImportResult>> {
+    return this.postPaidOrderItemsFile(file, 'reimport');
+  }
+
   private uploadPaidOrderItemsFile(
     file: File,
+  ): Observable<BatchUploadResult<PaidOrderItemsImportResult>> {
+    return this.postPaidOrderItemsFile(file, 'ingest');
+  }
+
+  private postPaidOrderItemsFile(
+    file: File,
+    action: 'ingest' | 'reimport',
   ): Observable<BatchUploadResult<PaidOrderItemsImportResult>> {
     const formData = new FormData();
     formData.append('file', file, file.name);
 
     return this.http
-      .post<PaidOrderItemsImportResult>(`${environment.apiBaseUrl}/paid-order-items/ingest`, formData)
+      .post<PaidOrderItemsImportResult>(
+        `${environment.apiBaseUrl}/paid-order-items/${action}`,
+        formData,
+      )
       .pipe(
         map((result) => ({
           fileName: result.fileName || file.name,

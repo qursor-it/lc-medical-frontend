@@ -2,6 +2,8 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { Component, computed, inject, signal } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { MessageService } from 'primeng/api';
+import { ButtonModule } from 'primeng/button';
+import { PopoverModule } from 'primeng/popover';
 
 import { uploadPanelConfigs } from '../../../../core/document-upload.config';
 import {
@@ -16,7 +18,7 @@ import { UploadResultsTable } from '../../../../shared/components/upload-results
 
 @Component({
   selector: 'app-uploads-page',
-  imports: [DocumentUploadPanel, UploadResultsTable],
+  imports: [ButtonModule, DocumentUploadPanel, PopoverModule, UploadResultsTable],
   templateUrl: './uploads-page.html',
 })
 export class UploadsPage {
@@ -70,6 +72,61 @@ export class UploadsPage {
 
   protected clearSelectedFiles(): void {
     this.uploadQueue.set([]);
+  }
+
+  protected canReimport(): boolean {
+    return this.kind() === 'paid-order-items' && this.selectedFiles().length === 1;
+  }
+
+  protected reimport(): void {
+    const file = this.selectedFiles()[0];
+    if (!file || this.kind() !== 'paid-order-items') {
+      return;
+    }
+
+    if (
+      !window.confirm(
+        `Sostituire TUTTI i pagamenti importati con il contenuto di "${file.name}"? ` +
+          `I dati attuali verranno cancellati e ricaricati dal file.`,
+      )
+    ) {
+      return;
+    }
+
+    this.uploading.set(true);
+    this.uploadQueue.update((items) =>
+      items.map((item): UploadQueueItem => ({ ...item, status: 'uploading', error: null })),
+    );
+
+    this.uploadService.reimportPaidOrderItems(file).subscribe({
+      next: (result) => {
+        this.applyUploadResults([result]);
+        if (result.success) {
+          const item = result.item as Record<string, unknown> | null;
+          this.messages.add({
+            severity: 'success',
+            summary: 'Reimport completato',
+            detail:
+              `Pagamenti sostituiti: ${this.numberValue(item?.['importedItems'])} righe caricate, ` +
+              `${this.numberValue(item?.['skippedRows'])} scartate.`,
+          });
+        } else {
+          this.messages.add({
+            severity: 'error',
+            summary: 'Reimport non riuscito',
+            detail: `${result.error ?? 'Operazione non riuscita.'} I dati esistenti non sono stati toccati.`,
+          });
+        }
+      },
+      error: (error: HttpErrorResponse) => {
+        this.messages.add({
+          severity: 'error',
+          summary: 'Reimport non riuscito',
+          detail: `${this.errorMessage(error)} I dati esistenti non sono stati toccati.`,
+        });
+      },
+      complete: () => this.uploading.set(false),
+    });
   }
 
   protected uploadSelectedFiles(): void {
