@@ -232,7 +232,7 @@
                   @if (detail.paidAt) {
                     <span class="inline-flex items-center gap-1">
                       <i class="pi pi-calendar text-slate-400"></i>
-                      Pagato il {{ detail.paidAt }}
+                      Pagato a {{ formatPaidMonth(detail.paidAt) }}
                     </span>
                   }
                   @if (detail.commissionAmount) {

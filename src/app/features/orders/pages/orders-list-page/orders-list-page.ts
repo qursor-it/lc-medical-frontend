@@ -262,6 +262,16 @@ export class OrdersListPage implements OnInit {
       });
   }
 
+  protected formatPaidMonth(value: string | null): string {
+    if (!value) {
+      return '-';
+    }
+
+    return new Intl.DateTimeFormat('it-IT', { month: 'long', year: 'numeric' }).format(
+      new Date(value),
+    );
+  }
+
   protected formatCurrency(value: number | null): string {
     if (value == null) {
       return '-';
