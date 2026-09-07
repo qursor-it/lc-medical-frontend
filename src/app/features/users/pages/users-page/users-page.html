@@ -106,17 +106,16 @@
           </td>
           <td data-label="Azioni" class="mobile-card-actions text-right">
             <div class="inline-flex flex-wrap justify-end gap-2">
-              @if (user.role !== 'ADMIN') {
-                <button
-                  pButton
-                  type="button"
-                  icon="pi pi-shield"
-                  label="Permessi"
-                  severity="secondary"
-                  size="small"
-                  (click)="openPermissions(user)"
-                ></button>
-              }
+              <button
+                pButton
+                type="button"
+                icon="pi pi-shield"
+                label="Permessi"
+                severity="secondary"
+                size="small"
+                [disabled]="user.role === 'ADMIN'"
+                (click)="openPermissions(user)"
+              ></button>
               <button
                 pButton
                 type="button"
