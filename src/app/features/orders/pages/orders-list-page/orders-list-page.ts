@@ -1,6 +1,7 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { ActivatedRoute } from '@angular/router';
 import { MessageService } from 'primeng/api';
 import { ButtonModule } from 'primeng/button';
 import { DatePickerModule } from 'primeng/datepicker';
@@ -46,6 +47,7 @@ export class OrdersListPage implements OnInit {
   private readonly ordersService = inject(OrdersService);
   private readonly messages = inject(MessageService);
   private readonly auth = inject(AuthService);
+  private readonly route = inject(ActivatedRoute);
 
   protected readonly isAdmin = this.auth.isAdmin;
   protected readonly orders = signal<OrderListItem[]>([]);
@@ -79,6 +81,11 @@ export class OrdersListPage implements OnInit {
   protected readonly monthLabel = computed(() => this.formatMonthLabel(this.monthDate()));
 
   ngOnInit(): void {
+    const search = this.route.snapshot.queryParamMap.get('search');
+    if (search) {
+      this.searchText.set(search);
+      this.appliedSearch.set(search);
+    }
     this.loadOrders();
   }
 

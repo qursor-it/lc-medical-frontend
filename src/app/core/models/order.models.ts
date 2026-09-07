@@ -99,11 +99,21 @@ export interface InvoiceSummary {
   total: number | null;
 }
 
+export interface AgentOrderCommission {
+  orderId: number | null;
+  orderNumber: string;
+  clientCode: string | null;
+  customerName: string | null;
+  paidAmount: number | null;
+  commissionAmount: number | null;
+}
+
 export interface AgentMonthlyCommission {
   month: string | null;
   orderCount: number;
   paidAmount: number | null;
   commissionAmount: number | null;
+  orders: AgentOrderCommission[];
 }
 
 export interface AgentCommissionSummary {
@@ -117,7 +127,8 @@ export interface AgentCommissionSummary {
 }
 
 export interface CommissionSummaryResponse {
-  month: string | null;
+  from: string | null;
+  to: string | null;
   agents: AgentCommissionSummary[];
   totalOrders: number;
   totalPaidAmount: number | null;

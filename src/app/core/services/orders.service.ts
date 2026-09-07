@@ -44,10 +44,13 @@ export class OrdersService {
     return this.http.get<OrderPaymentStatusResponse>(`${environment.apiBaseUrl}/orders/${id}`);
   }
 
-  getCommissionSummary(month = ''): Observable<CommissionSummaryResponse> {
+  getCommissionSummary(from = '', to = ''): Observable<CommissionSummaryResponse> {
     let params = new HttpParams();
-    if (month) {
-      params = params.set('month', month);
+    if (from) {
+      params = params.set('from', from);
+    }
+    if (to) {
+      params = params.set('to', to);
     }
     return this.http.get<CommissionSummaryResponse>(
       `${environment.apiBaseUrl}/orders/commission-summary`,
