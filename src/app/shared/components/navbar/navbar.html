@@ -77,6 +77,18 @@
       <i class="pi pi-chart-line"></i>
       <span>Dashboard</span>
     </a>
+    @if (auth.isAdmin()) {
+      <a
+        routerLink="/agents"
+        routerLinkActive="bg-teal-700 text-white hover:bg-teal-700 hover:text-white"
+        title="Commissioni agenti"
+        class="flex min-h-11 items-center gap-3 rounded-md px-3 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-teal-50 hover:text-teal-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-700"
+        (click)="closeMobileNav()"
+      >
+        <i class="pi pi-id-card"></i>
+        <span>Commissioni agenti</span>
+      </a>
+    }
     @if (auth.canView('orders')) {
       <a
         routerLink="/orders"
@@ -126,16 +138,6 @@
       </a>
     }
     @if (auth.isAdmin()) {
-      <a
-        routerLink="/agents"
-        routerLinkActive="bg-teal-700 text-white hover:bg-teal-700 hover:text-white"
-        title="Agenti"
-        class="flex min-h-11 items-center gap-3 rounded-md px-3 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-teal-50 hover:text-teal-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-700"
-        (click)="closeMobileNav()"
-      >
-        <i class="pi pi-id-card"></i>
-        <span>Agenti</span>
-      </a>
       <a
         routerLink="/users"
         routerLinkActive="bg-teal-700 text-white hover:bg-teal-700 hover:text-white"

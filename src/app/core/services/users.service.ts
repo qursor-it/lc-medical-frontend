@@ -5,6 +5,7 @@ import { Observable } from 'rxjs';
 import {
   AuthUser,
   CreateUserRequest,
+  UpdateUserCommissionSettingsRequest,
   UpdateUserPermissionsRequest,
   UpdateUserRoleRequest,
 } from '../models/auth.models';
@@ -28,6 +29,16 @@ export class UsersService {
 
   updatePermissions(id: number, request: UpdateUserPermissionsRequest): Observable<AuthUser> {
     return this.http.put<AuthUser>(`${environment.apiBaseUrl}/users/${id}/permissions`, request);
+  }
+
+  updateCommissionSettings(
+    id: number,
+    request: UpdateUserCommissionSettingsRequest,
+  ): Observable<AuthUser> {
+    return this.http.put<AuthUser>(
+      `${environment.apiBaseUrl}/users/${id}/commission-settings`,
+      request,
+    );
   }
 
   deleteUser(id: number): Observable<void> {

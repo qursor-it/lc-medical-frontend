@@ -120,6 +120,15 @@
               <button
                 pButton
                 type="button"
+                icon="pi pi-percentage"
+                label="Provvigioni"
+                severity="secondary"
+                size="small"
+                (click)="openCommissionSettings(user)"
+              ></button>
+              <button
+                pButton
+                type="button"
                 icon="pi pi-key"
                 label="Password"
                 severity="secondary"
@@ -314,6 +323,109 @@
         label="Salva"
         [loading]="permissionsSaving()"
         (click)="savePermissions()"
+      ></button>
+    </div>
+  }
+</p-dialog>
+
+<p-dialog
+  appendTo="body"
+  [visible]="commissionUser() !== null"
+  [modal]="true"
+  [style]="{ width: 'min(30rem, calc(100vw - 2rem))' }"
+  [header]="'Provvigioni · ' + (commissionUser()?.fullName ?? '')"
+  (visibleChange)="closeCommissionSettings()"
+  (onHide)="closeCommissionSettings()"
+>
+  @if (commissionUser(); as user) {
+    <p class="mb-4 text-sm text-slate-500">
+      Configura la provvigione riconosciuta a {{ user.email }} sugli ordini che carica.
+    </p>
+
+    <div
+      class="mb-4 flex items-center justify-between gap-3 rounded-md border border-slate-200 px-4 py-3"
+    >
+      <span class="text-sm font-medium text-slate-900">Riceve provvigioni</span>
+      <p-toggleswitch
+        [ngModel]="commissionDraft().receivesCommissions"
+        (ngModelChange)="setReceivesCommissions($event)"
+        ariaLabel="Riceve provvigioni"
+      />
+    </div>
+
+    <div class="space-y-4" [class.opacity-50]="!commissionDraft().receivesCommissions">
+      <div>
+        <label class="text-sm font-medium text-slate-700" for="commission-base">
+          Base di calcolo provvigione
+        </label>
+        <p-select
+          inputId="commission-base"
+          appendTo="body"
+          styleClass="mt-1 w-full"
+          [options]="commissionBaseOptions"
+          optionLabel="label"
+          optionValue="value"
+          [ngModel]="commissionDraft().commissionBase"
+          [ngModelOptions]="{ standalone: true }"
+          [disabled]="commissionSaving()"
+          (ngModelChange)="setCommissionBase($event)"
+        ></p-select>
+      </div>
+
+      <div>
+        <label class="text-sm font-medium text-slate-700" for="commission-rate">
+          Percentuale provvigione (%)
+        </label>
+        <input
+          id="commission-rate"
+          type="number"
+          min="0"
+          max="100"
+          step="0.01"
+          [class]="inputClass()"
+          [value]="commissionDraft().commissionRatePercent"
+          [disabled]="commissionSaving()"
+          (input)="updateCommissionRate($event)"
+        />
+      </div>
+
+      <div [class.opacity-50]="!isCommissionGross()">
+        <label class="text-sm font-medium text-slate-700" for="commission-vat">
+          Aliquota IVA (%)
+        </label>
+        <input
+          id="commission-vat"
+          type="number"
+          min="0"
+          max="100"
+          step="0.01"
+          [class]="inputClass()"
+          [value]="commissionDraft().vatRatePercent"
+          [disabled]="commissionSaving()"
+          (input)="updateCommissionVat($event)"
+        />
+        <p class="mt-1 text-xs text-slate-500">
+          Usata solo con base "Lordo", per aggiungere l'IVA all'imponibile dei pagamenti.
+        </p>
+      </div>
+    </div>
+
+    <div class="mt-5 flex justify-end gap-2">
+      <button
+        pButton
+        type="button"
+        label="Annulla"
+        severity="secondary"
+        [disabled]="commissionSaving()"
+        (click)="closeCommissionSettings()"
+      ></button>
+      <button
+        pButton
+        type="button"
+        icon="pi pi-check"
+        label="Salva"
+        [loading]="commissionSaving()"
+        (click)="saveCommissionSettings()"
       ></button>
     </div>
   }

@@ -1,5 +1,5 @@
 import { HttpErrorResponse } from '@angular/common/http';
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MessageService } from 'primeng/api';
 import { ButtonModule } from 'primeng/button';
@@ -10,7 +10,14 @@ import { TagModule } from 'primeng/tag';
 import { ToggleSwitchModule } from 'primeng/toggleswitch';
 import { finalize } from 'rxjs';
 
-import { AuthUser, UserPermissions, UserRole } from '../../../../core/models/auth.models';
+import {
+  AuthUser,
+  UpdateUserCommissionSettingsRequest,
+  UserCommissionSettings,
+  UserPermissions,
+  UserRole,
+} from '../../../../core/models/auth.models';
+import { CommissionBase } from '../../../../core/models/settings.models';
 import { AuthService } from '../../../../core/services/auth.service';
 import { UsersService } from '../../../../core/services/users.service';
 
@@ -21,6 +28,13 @@ const EMPTY_PERMISSIONS: UserPermissions = {
   canViewInvoices: false,
   canUploadPayments: false,
   canViewPayments: false,
+};
+
+const EMPTY_COMMISSION_SETTINGS: UserCommissionSettings = {
+  receivesCommissions: false,
+  commissionBase: 'NET',
+  commissionRatePercent: 5,
+  vatRatePercent: 22,
 };
 
 @Component({
@@ -59,6 +73,17 @@ export class UsersPage implements OnInit {
   protected readonly permissionsUser = signal<AuthUser | null>(null);
   protected readonly permissionsDraft = signal<UserPermissions>({ ...EMPTY_PERMISSIONS });
   protected readonly permissionsSaving = signal(false);
+
+  protected readonly commissionUser = signal<AuthUser | null>(null);
+  protected readonly commissionDraft = signal<UpdateUserCommissionSettingsRequest>({
+    ...EMPTY_COMMISSION_SETTINGS,
+  });
+  protected readonly commissionSaving = signal(false);
+
+  protected readonly commissionBaseOptions = [
+    { label: 'Netto (imponibile)', value: 'NET' as CommissionBase },
+    { label: 'Lordo (IVA inclusa)', value: 'GROSS' as CommissionBase },
+  ];
 
   protected readonly resetPasswordUser = signal<AuthUser | null>(null);
   protected readonly resetPasswordValue = signal('');
@@ -225,6 +250,77 @@ export class UsersPage implements OnInit {
         },
         error: (error: HttpErrorResponse) => this.showError('Permessi non aggiornati', error),
       });
+  }
+
+  protected readonly isCommissionGross = computed(
+    () => this.commissionDraft().commissionBase === 'GROSS',
+  );
+
+  protected openCommissionSettings(user: AuthUser): void {
+    this.commissionUser.set(user);
+    this.commissionDraft.set({ ...EMPTY_COMMISSION_SETTINGS, ...user.commissionSettings });
+  }
+
+  protected closeCommissionSettings(): void {
+    this.commissionUser.set(null);
+  }
+
+  protected setReceivesCommissions(value: boolean): void {
+    this.commissionDraft.update((draft) => ({ ...draft, receivesCommissions: value }));
+  }
+
+  protected setCommissionBase(value: CommissionBase): void {
+    this.commissionDraft.update((draft) => ({ ...draft, commissionBase: value }));
+  }
+
+  protected updateCommissionRate(event: Event): void {
+    const value = Number((event.target as HTMLInputElement).value);
+    this.commissionDraft.update((draft) => ({ ...draft, commissionRatePercent: value }));
+  }
+
+  protected updateCommissionVat(event: Event): void {
+    const value = Number((event.target as HTMLInputElement).value);
+    this.commissionDraft.update((draft) => ({ ...draft, vatRatePercent: value }));
+  }
+
+  protected saveCommissionSettings(): void {
+    const user = this.commissionUser();
+    if (!user) {
+      return;
+    }
+
+    const draft = this.commissionDraft();
+    if (draft.receivesCommissions) {
+      const rate = draft.commissionRatePercent;
+      const vat = draft.vatRatePercent;
+      if (!this.isValidPercent(rate) || !this.isValidPercent(vat)) {
+        this.messages.add({
+          severity: 'warn',
+          summary: 'Valori non validi',
+          detail: 'Le percentuali devono essere comprese tra 0 e 100.',
+        });
+        return;
+      }
+    }
+
+    this.commissionSaving.set(true);
+    this.usersService
+      .updateCommissionSettings(user.id, draft)
+      .pipe(finalize(() => this.commissionSaving.set(false)))
+      .subscribe({
+        next: (updated) => {
+          this.users.update((users) =>
+            users.map((item) => (item.id === updated.id ? updated : item)),
+          );
+          this.closeCommissionSettings();
+          this.messages.add({ severity: 'success', summary: 'Provvigioni aggiornate' });
+        },
+        error: (error: HttpErrorResponse) => this.showError('Provvigioni non aggiornate', error),
+      });
+  }
+
+  private isValidPercent(value: number): boolean {
+    return Number.isFinite(value) && value >= 0 && value <= 100;
   }
 
   protected deleteUser(user: AuthUser): void {

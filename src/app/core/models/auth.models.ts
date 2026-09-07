@@ -1,3 +1,5 @@
+import { CommissionBase } from './settings.models';
+
 export type UserRole = 'ADMIN' | 'USER';
 
 /** The three gated areas of the app. */
@@ -12,6 +14,15 @@ export interface UserPermissions {
   canViewPayments: boolean;
 }
 
+export interface UserCommissionSettings {
+  receivesCommissions: boolean;
+  commissionBase: CommissionBase;
+  commissionRatePercent: number;
+  vatRatePercent: number;
+}
+
+export type UpdateUserCommissionSettingsRequest = UserCommissionSettings;
+
 export interface AuthUser {
   id: number;
   email: string;
@@ -19,6 +30,7 @@ export interface AuthUser {
   role: UserRole;
   active: boolean;
   permissions: UserPermissions;
+  commissionSettings: UserCommissionSettings;
 }
 
 export interface LoginRequest {
