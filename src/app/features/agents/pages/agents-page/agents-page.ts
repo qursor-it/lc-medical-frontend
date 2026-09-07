@@ -34,6 +34,7 @@ export class AgentsPage implements OnInit {
   protected readonly toDate = signal<Date | null>(null);
   protected readonly preset = signal<string | null>('all');
   protected readonly expandedAgent = signal<string | null>(null);
+  protected readonly expandedMonths = signal<ReadonlySet<string>>(new Set());
   protected readonly skeletonRows = Array.from({ length: 8 });
 
   protected readonly presetOptions = [
@@ -92,6 +93,7 @@ export class AgentsPage implements OnInit {
       this.toDate.set(range.to);
     }
     this.expandedAgent.set(null);
+    this.expandedMonths.set(new Set());
     this.load();
   }
 
@@ -103,6 +105,7 @@ export class AgentsPage implements OnInit {
     }
     this.preset.set(null);
     this.expandedAgent.set(null);
+    this.expandedMonths.set(new Set());
     this.load();
   }
 
@@ -114,6 +117,7 @@ export class AgentsPage implements OnInit {
     }
     this.preset.set(null);
     this.expandedAgent.set(null);
+    this.expandedMonths.set(new Set());
     this.load();
   }
 
@@ -124,6 +128,21 @@ export class AgentsPage implements OnInit {
 
   protected isExpanded(row: AgentCommissionSummary): boolean {
     return this.expandedAgent() === this.agentKey(row);
+  }
+
+  protected toggleMonth(row: AgentCommissionSummary, month: string | null): void {
+    const key = this.monthKey(row, month);
+    const next = new Set(this.expandedMonths());
+    if (next.has(key)) {
+      next.delete(key);
+    } else {
+      next.add(key);
+    }
+    this.expandedMonths.set(next);
+  }
+
+  protected isMonthExpanded(row: AgentCommissionSummary, month: string | null): boolean {
+    return this.expandedMonths().has(this.monthKey(row, month));
   }
 
   protected openOrder(order: AgentOrderCommission): void {
@@ -192,6 +211,10 @@ export class AgentsPage implements OnInit {
 
   private agentKey(row: AgentCommissionSummary): string {
     return row.agentId != null ? String(row.agentId) : row.agentName;
+  }
+
+  private monthKey(row: AgentCommissionSummary, month: string | null): string {
+    return `${this.agentKey(row)}:${month ?? ''}`;
   }
 
   private presetRange(preset: string): { from: Date | null; to: Date | null } {
