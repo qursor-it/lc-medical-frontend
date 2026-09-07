@@ -99,6 +99,15 @@ export interface InvoiceSummary {
   total: number | null;
 }
 
+export type AgentPaymentStatus = 'PAID' | 'PARTIAL' | 'UNPAID';
+
+export interface AgentPaymentDetail {
+  documentNumber: string | null;
+  postingDate: string | null;
+  paidAmount: number | null;
+  commissionAmount: number | null;
+}
+
 export interface AgentOrderCommission {
   orderId: number | null;
   orderNumber: string;
@@ -106,6 +115,8 @@ export interface AgentOrderCommission {
   customerName: string | null;
   paidAmount: number | null;
   commissionAmount: number | null;
+  paymentStatus: AgentPaymentStatus | null; // null only for "Non attribuito" orders
+  payments: AgentPaymentDetail[];
 }
 
 export interface AgentMonthlyCommission {
@@ -124,6 +135,7 @@ export interface AgentCommissionSummary {
   paidAmount: number | null;
   commissionAmount: number | null;
   months: AgentMonthlyCommission[];
+  pendingOrders: AgentOrderCommission[];
 }
 
 export interface CommissionSummaryResponse {

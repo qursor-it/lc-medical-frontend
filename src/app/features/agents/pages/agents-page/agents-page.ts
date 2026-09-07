@@ -7,18 +7,20 @@ import { ButtonModule } from 'primeng/button';
 import { DatePickerModule } from 'primeng/datepicker';
 import { SelectModule } from 'primeng/select';
 import { TableModule } from 'primeng/table';
+import { TagModule } from 'primeng/tag';
 import { finalize } from 'rxjs';
 
 import {
   AgentCommissionSummary,
   AgentOrderCommission,
+  AgentPaymentStatus,
   CommissionSummaryResponse,
 } from '../../../../core/models/order.models';
 import { OrdersService } from '../../../../core/services/orders.service';
 
 @Component({
   selector: 'app-agents-page',
-  imports: [ButtonModule, DatePickerModule, FormsModule, SelectModule, TableModule],
+  imports: [ButtonModule, DatePickerModule, FormsModule, SelectModule, TableModule, TagModule],
   templateUrl: './agents-page.html',
 })
 export class AgentsPage implements OnInit {
@@ -148,6 +150,44 @@ export class AgentsPage implements OnInit {
       style: 'currency',
       currency: 'EUR',
     }).format(value);
+  }
+
+  protected formatPostingDate(value: string | null): string {
+    if (!value) {
+      return '-';
+    }
+
+    return new Intl.DateTimeFormat('it-IT', {
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric',
+    }).format(new Date(value));
+  }
+
+  protected paymentStatusLabel(status: AgentPaymentStatus | null | undefined): string {
+    switch (status) {
+      case 'PAID':
+        return 'Pagato';
+      case 'PARTIAL':
+        return 'Parziale';
+      case 'UNPAID':
+      default:
+        return 'Non pagato';
+    }
+  }
+
+  protected paymentStatusSeverity(
+    status: AgentPaymentStatus | null | undefined,
+  ): 'success' | 'warn' | 'danger' {
+    switch (status) {
+      case 'PAID':
+        return 'success';
+      case 'PARTIAL':
+        return 'warn';
+      case 'UNPAID':
+      default:
+        return 'danger';
+    }
   }
 
   private agentKey(row: AgentCommissionSummary): string {
