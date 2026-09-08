@@ -283,6 +283,12 @@
                                       [severity]="paymentStatusSeverity(order.paymentStatus)"
                                       [value]="paymentStatusLabel(order.paymentStatus)"
                                     />
+                                  } @else {
+                                    <span
+                                      class="text-xs text-slate-400"
+                                      title="Nessun ordine caricato con questo numero: non è possibile calcolare lo stato."
+                                      >Sconosciuto</span
+                                    >
                                   }
                                 </div>
                               </div>
