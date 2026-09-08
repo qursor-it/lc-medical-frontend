@@ -207,17 +207,21 @@
                         <span class="text-xs text-slate-500">{{ monthRow.orderCount }} ordini</span>
                       </div>
                       <div class="flex items-center gap-3 text-xs tabular-nums text-slate-600">
-                        <span>{{ formatCurrency(monthRow.paidAmount) }}</span>
-                        <span class="font-semibold text-teal-700">{{
-                          formatCurrency(monthRow.commissionAmount)
-                        }}</span>
+                        <span
+                          ><span class="text-slate-400">Incassato </span
+                          >{{ formatCurrency(monthRow.paidAmount) }}</span
+                        >
+                        <span class="font-semibold text-teal-700"
+                          ><span class="font-normal text-slate-400">Compenso </span
+                          >{{ formatCurrency(monthRow.commissionAmount) }}</span
+                        >
                       </div>
                     </div>
 
                     @if (isMonthExpanded(row, monthRow.month)) {
                       <div class="ml-1.5 mt-2 border-l-2 border-slate-200 pl-3">
                         <div
-                          class="hidden sm:grid sm:grid-cols-[1.1fr_1.3fr_auto_auto_auto] sm:items-center sm:gap-3 sm:px-2 sm:pb-1.5 sm:text-xs sm:font-medium sm:uppercase sm:tracking-wide sm:text-slate-400"
+                          class="hidden sm:grid sm:grid-cols-[minmax(0,1.1fr)_minmax(0,1.3fr)_7rem_7rem_6rem] sm:items-center sm:gap-3 sm:px-2 sm:pb-1.5 sm:text-xs sm:font-medium sm:uppercase sm:tracking-wide sm:text-slate-400"
                         >
                           <span>Ordine</span>
                           <span>Cliente</span>
@@ -232,7 +236,7 @@
                           @for (order of monthRow.orders; track order.orderNumber) {
                             <div class="px-2 py-2 transition-colors hover:bg-slate-50">
                               <div
-                                class="flex cursor-pointer flex-col gap-1 sm:grid sm:grid-cols-[1.1fr_1.3fr_auto_auto_auto] sm:items-center sm:gap-3"
+                                class="flex cursor-pointer flex-col gap-1 sm:grid sm:grid-cols-[minmax(0,1.1fr)_minmax(0,1.3fr)_7rem_7rem_6rem] sm:items-center sm:gap-3"
                                 (click)="openOrder(order)"
                               >
                                 <div class="flex items-center justify-between gap-2 sm:block">
@@ -245,9 +249,11 @@
                                     class="text-xs font-medium uppercase tracking-wide text-slate-400 sm:hidden"
                                     >Cliente</span
                                   >
-                                  <span class="cell-clip text-slate-700">{{
-                                    order.customerName || order.clientCode || '—'
-                                  }}</span>
+                                  <span
+                                    class="cell-clip text-slate-700"
+                                    [title]="order.customerName || order.clientCode"
+                                    >{{ order.customerName || order.clientCode || '—' }}</span
+                                  >
                                 </div>
                                 <div
                                   class="flex items-center justify-between gap-2 tabular-nums text-slate-600 sm:block sm:text-right"
@@ -283,20 +289,33 @@
 
                               @if (order.payments.length > 1) {
                                 <div
-                                  class="mt-1.5 space-y-1 border-l-2 border-slate-100 py-1 pl-3 text-xs text-slate-500"
+                                  class="mt-1.5 space-y-1 border-t border-dashed border-slate-100 pt-1.5"
                                 >
-                                  @for (payment of order.payments; track $index) {
-                                    <div class="flex flex-wrap items-center gap-x-3 gap-y-0.5">
-                                      <span class="font-mono text-slate-600">{{
+                                  @for (
+                                    payment of order.payments;
+                                    track payment.documentNumber ?? $index
+                                  ) {
+                                    <div
+                                      class="flex flex-col gap-1 sm:grid sm:grid-cols-[minmax(0,1.1fr)_minmax(0,1.3fr)_7rem_7rem_6rem] sm:items-center sm:gap-3"
+                                    >
+                                      <span class="font-mono text-xs text-slate-500 sm:pl-4">{{
                                         payment.documentNumber || '—'
                                       }}</span>
-                                      <span>{{ formatPostingDate(payment.postingDate) }}</span>
-                                      <span class="tabular-nums">{{
-                                        formatCurrency(payment.paidAmount)
-                                      }}</span>
-                                      <span class="tabular-nums text-teal-700">{{
-                                        formatCurrency(payment.commissionAmount)
-                                      }}</span>
+                                      <span
+                                        class="inline-flex items-center gap-1 text-xs text-slate-500"
+                                      >
+                                        <i class="pi pi-calendar text-[0.65rem] text-slate-400"></i>
+                                        {{ formatPostingDate(payment.postingDate) }}
+                                      </span>
+                                      <span
+                                        class="tabular-nums text-xs text-slate-500 sm:text-right"
+                                        >{{ formatCurrency(payment.paidAmount) }}</span
+                                      >
+                                      <span
+                                        class="tabular-nums text-xs font-semibold text-teal-700 sm:text-right"
+                                        >{{ formatCurrency(payment.commissionAmount) }}</span
+                                      >
+                                      <span></span>
                                     </div>
                                   }
                                 </div>
