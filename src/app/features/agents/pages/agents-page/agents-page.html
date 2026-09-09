@@ -1,6 +1,6 @@
 <section class="border-b border-slate-200 bg-white">
   <div
-    class="mx-auto flex w-full flex-col gap-3 px-5 py-3 md:flex-row md:items-center md:justify-between lg:px-8"
+    class="mx-auto flex w-full flex-col gap-3 px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-5 lg:px-8"
   >
     <div>
       <h1 class="text-xl font-semibold leading-tight text-slate-950">Commissioni agenti</h1>
@@ -9,58 +9,15 @@
       </p>
     </div>
 
-    <div class="flex w-full flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center md:w-auto">
-      <p-select
-        appendTo="body"
-        [options]="presetOptions"
-        optionLabel="label"
-        optionValue="value"
-        [ngModel]="preset()"
-        (ngModelChange)="onPresetChange($event)"
-        [disabled]="loading()"
-        placeholder="Periodo"
-        styleClass="w-full sm:w-44"
-        ariaLabel="Preset periodo"
-      />
-      <div class="flex items-center gap-2">
-        <p-datepicker
-          appendTo="body"
-          view="month"
-          dateFormat="mm/yy"
-          [readonlyInput]="true"
-          [showClear]="true"
-          [ngModel]="fromDate()"
-          (ngModelChange)="onFromChange($event)"
-          [disabled]="loading()"
-          placeholder="Da mese"
-          styleClass="w-full sm:w-36"
-          inputStyleClass="w-full"
-        />
-        <span class="text-slate-400" aria-hidden="true">–</span>
-        <p-datepicker
-          appendTo="body"
-          view="month"
-          dateFormat="mm/yy"
-          [readonlyInput]="true"
-          [showClear]="true"
-          [ngModel]="toDate()"
-          (ngModelChange)="onToChange($event)"
-          [disabled]="loading()"
-          placeholder="A mese"
-          styleClass="w-full sm:w-36"
-          inputStyleClass="w-full"
-        />
-      </div>
-      <button
-        pButton
-        type="button"
-        icon="pi pi-refresh"
-        label="Aggiorna"
-        severity="secondary"
-        [loading]="loading()"
-        (click)="load()"
-      ></button>
-    </div>
+    <button
+      pButton
+      type="button"
+      icon="pi pi-refresh"
+      label="Aggiorna"
+      severity="secondary"
+      [loading]="loading()"
+      (click)="load()"
+    ></button>
   </div>
 </section>
 
@@ -86,17 +43,76 @@
     </article>
   </div>
 
-  <div class="overflow-hidden rounded-md border border-slate-200 bg-white shadow-sm">
-    <div class="flex items-center justify-between gap-3 border-b border-slate-200 px-4 py-3">
-      <span class="font-semibold text-slate-900">Dettaglio per agente</span>
-      @if (rangeLabel()) {
-        <span
-          class="inline-flex items-center gap-1 rounded-md border border-teal-200 bg-teal-50 px-2 py-1 text-xs font-semibold text-teal-800"
-        >
-          <i class="pi pi-calendar text-[0.7rem]"></i>
-          <span>{{ rangeLabel() }}</span>
-        </span>
-      }
+  <div
+    class="relative overflow-hidden rounded-md border border-slate-200 bg-white shadow-sm"
+    [attr.aria-busy]="loading()"
+  >
+    <div class="border-b border-slate-200 bg-white px-4 py-4">
+      <div class="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
+        <div class="flex flex-wrap items-center gap-2 text-sm">
+          <span class="font-semibold text-slate-900">Dettaglio per agente</span>
+          @if (rangeLabel()) {
+            <span
+              class="inline-flex items-center gap-1 rounded-md border border-teal-200 bg-teal-50 px-2 py-1 text-xs font-semibold text-teal-800"
+            >
+              <i class="pi pi-calendar text-[0.7rem]"></i>
+              <span>{{ rangeLabel() }}</span>
+            </span>
+          }
+        </div>
+        @if (loading()) {
+          <span
+            class="inline-flex items-center gap-2 rounded-md bg-teal-50 px-2 py-1 text-xs font-semibold text-teal-700"
+          >
+            <i class="pi pi-spin pi-spinner text-xs"></i>
+            Caricamento
+          </span>
+        }
+
+        <div class="flex flex-col gap-2 lg:flex-row lg:items-center lg:justify-end">
+          <p-select
+            appendTo="body"
+            [options]="presetOptions"
+            optionLabel="label"
+            optionValue="value"
+            [ngModel]="preset()"
+            (ngModelChange)="onPresetChange($event)"
+            [disabled]="loading()"
+            placeholder="Periodo"
+            styleClass="w-full lg:w-44"
+            ariaLabel="Preset periodo"
+          />
+          <div class="flex items-center gap-2">
+            <p-datepicker
+              appendTo="body"
+              view="month"
+              dateFormat="mm/yy"
+              [readonlyInput]="true"
+              [showClear]="true"
+              [ngModel]="fromDate()"
+              (ngModelChange)="onFromChange($event)"
+              [disabled]="loading()"
+              placeholder="Da mese"
+              styleClass="w-full lg:w-36"
+              inputStyleClass="w-full"
+            />
+            <span class="text-slate-400" aria-hidden="true">–</span>
+            <p-datepicker
+              appendTo="body"
+              view="month"
+              dateFormat="mm/yy"
+              [readonlyInput]="true"
+              [showClear]="true"
+              [ngModel]="toDate()"
+              (ngModelChange)="onToChange($event)"
+              [disabled]="loading()"
+              placeholder="A mese"
+              styleClass="w-full lg:w-36"
+              inputStyleClass="w-full"
+            />
+          </div>
+        </div>
+      </div>
     </div>
 
     @if (loading()) {
