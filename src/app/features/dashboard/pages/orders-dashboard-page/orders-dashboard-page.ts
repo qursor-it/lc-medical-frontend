@@ -345,6 +345,7 @@ export class OrdersDashboardPage implements OnInit {
               id: detail.order.id,
               orderNumber: detail.order.orderNumber,
               clientCode: detail.order.clientCode,
+              customerName: detail.order.customerName,
               paid: detail.paid,
               paymentStatus: detail.paymentStatus,
               commissionAmount: detail.commissionAmount,

@@ -1,11 +1,12 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { RouterLink } from '@angular/router';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 import { MessageService } from 'primeng/api';
 import { ButtonModule } from 'primeng/button';
 import { DatePickerModule } from 'primeng/datepicker';
 import { PaginatorModule, PaginatorState } from 'primeng/paginator';
+import { SelectModule } from 'primeng/select';
 import { TableModule } from 'primeng/table';
 import { TagModule } from 'primeng/tag';
 import { finalize } from 'rxjs';
@@ -14,6 +15,8 @@ import {
   PaidOrderItem,
   PaidOrderItemsPageResponse,
 } from '../../../../core/models/paid-order-item.models';
+import { CustomerOption, toCustomerOptions } from '../../../../shared/customer-options';
+import { CustomersService } from '../../../../core/services/customers.service';
 import { PaidOrderItemsService } from '../../../../core/services/paid-order-items.service';
 
 @Component({
@@ -24,6 +27,7 @@ import { PaidOrderItemsService } from '../../../../core/services/paid-order-item
     FormsModule,
     PaginatorModule,
     RouterLink,
+    SelectModule,
     TableModule,
     TagModule,
   ],
@@ -31,7 +35,9 @@ import { PaidOrderItemsService } from '../../../../core/services/paid-order-item
 })
 export class PaymentsListPage implements OnInit {
   private readonly paidOrderItemsService = inject(PaidOrderItemsService);
+  private readonly customersService = inject(CustomersService);
   private readonly messages = inject(MessageService);
+  private readonly route = inject(ActivatedRoute);
 
   protected readonly payments = signal<PaidOrderItem[]>([]);
   protected readonly loading = signal(false);
@@ -42,6 +48,8 @@ export class PaymentsListPage implements OnInit {
   protected readonly searchText = signal('');
   protected readonly appliedSearch = signal('');
   protected readonly monthDate = signal<Date | null>(null);
+  protected readonly customerOptions = signal<CustomerOption[]>([]);
+  protected readonly customerFilter = signal<string | null>(null);
 
   protected readonly resultLabel = computed(() => {
     const total = this.totalItems();
@@ -55,8 +63,27 @@ export class PaymentsListPage implements OnInit {
   protected readonly pageTotal = computed(() =>
     this.payments().reduce((total, payment) => total + (payment.lineTotal ?? 0), 0),
   );
+  // Fino a quando la lista clienti arriva, la chip mostra il codice grezzo dal queryParam.
+  protected readonly selectedCustomerLabel = computed(() => {
+    const code = this.customerFilter();
+    if (!code) {
+      return null;
+    }
+    const option = this.customerOptions().find((o) => o.value === code);
+    return option?.name ? `${option.name} (${option.code})` : code;
+  });
 
   ngOnInit(): void {
+    const customer = this.route.snapshot.queryParamMap.get('customer');
+    if (customer) {
+      this.customerFilter.set(customer);
+    }
+
+    this.customersService.getCustomers().subscribe({
+      next: (customers) => this.customerOptions.set(toCustomerOptions(customers)),
+      error: () => this.customerOptions.set([]),
+    });
+
     this.loadPayments();
   }
 
@@ -64,7 +91,13 @@ export class PaymentsListPage implements OnInit {
     this.loading.set(true);
 
     this.paidOrderItemsService
-      .getPaidOrderItems(this.page(), this.size(), this.appliedSearch(), this.monthParam())
+      .getPaidOrderItems(
+        this.page(),
+        this.size(),
+        this.appliedSearch(),
+        this.monthParam(),
+        this.customerFilter() ?? '',
+      )
       .pipe(finalize(() => this.loading.set(false)))
       .subscribe({
         next: (response) => this.applyPageResponse(response),
@@ -104,6 +137,12 @@ export class PaymentsListPage implements OnInit {
 
   protected onMonthChange(date: Date | null): void {
     this.monthDate.set(date);
+    this.page.set(0);
+    this.loadPayments();
+  }
+
+  protected onCustomerFilterChange(value: string | null): void {
+    this.customerFilter.set(value || null);
     this.page.set(0);
     this.loadPayments();
   }

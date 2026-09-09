@@ -14,6 +14,7 @@ export interface OrderListItem {
   id: number;
   orderNumber: string;
   clientCode: string | null;
+  customerName: string | null;
   paid: boolean;
   paymentStatus: PaymentStatus;
   commissionAmount: number | null;
@@ -41,6 +42,7 @@ export interface OrderSummary {
   surgeryDate: string | null;
   shippingDate: string | null;
   clientCode: string | null;
+  customerName: string | null;
   pickupDate: string | null;
   shipTo: string | null;
   orderRef: string | null;
@@ -113,6 +115,7 @@ export interface AgentOrderCommission {
   orderNumber: string;
   clientCode: string | null;
   customerName: string | null;
+  payerName: string | null; // set only when the invoiced party differs from the customer (e.g. a patient)
   paidAmount: number | null;
   commissionAmount: number | null;
   paymentStatus: AgentPaymentStatus | null; // null only for "Non attribuito" orders

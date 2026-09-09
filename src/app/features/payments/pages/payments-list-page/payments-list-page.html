@@ -71,6 +71,14 @@
               <span class="truncate">{{ appliedSearch() }}</span>
             </span>
           }
+          @if (selectedCustomerLabel(); as customerLabel) {
+            <span
+              class="inline-flex min-w-0 max-w-full items-center gap-1 rounded-md border border-teal-200 bg-teal-50 px-2 py-1 text-xs font-semibold text-teal-800"
+            >
+              <i class="pi pi-building text-[0.7rem]"></i>
+              <span class="truncate">{{ customerLabel }}</span>
+            </span>
+          }
         </div>
         @if (loading()) {
           <span
@@ -82,6 +90,25 @@
         }
 
         <div class="flex flex-col gap-2 lg:flex-row lg:items-center lg:justify-end">
+          <p-select
+            appendTo="body"
+            [options]="customerOptions()"
+            optionLabel="label"
+            optionValue="value"
+            [filter]="true"
+            filterBy="label"
+            filterPlaceholder="Cerca cliente o codice"
+            [resetFilterOnHide]="true"
+            [showClear]="true"
+            [virtualScroll]="true"
+            [virtualScrollItemSize]="38"
+            [ngModel]="customerFilter()"
+            (ngModelChange)="onCustomerFilterChange($event)"
+            [disabled]="loading()"
+            placeholder="Cliente"
+            styleClass="w-full lg:w-60"
+            ariaLabel="Filtra per cliente"
+          />
           <p-datepicker
             appendTo="body"
             view="month"

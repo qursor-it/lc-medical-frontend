@@ -149,6 +149,15 @@ export class AgentsPage implements OnInit {
     this.router.navigate(['/orders'], { queryParams: { search: order.orderNumber } });
   }
 
+  /** Apre gli ordini del cliente. Ferma la propagazione: la riga ha già un click su openOrder. */
+  protected openCustomer(order: AgentOrderCommission, event: Event): void {
+    event.stopPropagation();
+    if (!order.clientCode) {
+      return;
+    }
+    this.router.navigate(['/orders'], { queryParams: { customer: order.clientCode } });
+  }
+
   protected formatMonth(value: string | null): string {
     if (!value) {
       return 'Mese non determinato';

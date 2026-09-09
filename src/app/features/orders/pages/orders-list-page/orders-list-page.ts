@@ -24,7 +24,9 @@ import {
   lineStatusLabel,
   lineStatusTitle,
 } from '../../../../shared/line-status';
+import { CustomerOption, toCustomerOptions } from '../../../../shared/customer-options';
 import { AuthService } from '../../../../core/services/auth.service';
+import { CustomersService } from '../../../../core/services/customers.service';
 import { OrdersService } from '../../../../core/services/orders.service';
 
 type OrderEditForm = Record<keyof UpdateOrderRequest, string>;
@@ -45,6 +47,7 @@ type OrderEditForm = Record<keyof UpdateOrderRequest, string>;
 })
 export class OrdersListPage implements OnInit {
   private readonly ordersService = inject(OrdersService);
+  private readonly customersService = inject(CustomersService);
   private readonly messages = inject(MessageService);
   private readonly auth = inject(AuthService);
   private readonly route = inject(ActivatedRoute);
@@ -73,12 +76,23 @@ export class OrdersListPage implements OnInit {
     { label: 'Pagato', value: 'paid' },
     { label: 'Non pagato', value: 'unpaid' },
   ];
+  protected readonly customerOptions = signal<CustomerOption[]>([]);
+  protected readonly customerFilter = signal<string | null>(null);
   protected readonly resultLabel = computed(() => {
     const total = this.totalItems();
     return total === 1 ? '1 risultato' : `${total} risultati`;
   });
   protected readonly hasSearch = computed(() => this.appliedSearch().length > 0);
   protected readonly monthLabel = computed(() => this.formatMonthLabel(this.monthDate()));
+  // Fino a quando la lista clienti arriva, la chip mostra il codice grezzo dal queryParam.
+  protected readonly selectedCustomerLabel = computed(() => {
+    const code = this.customerFilter();
+    if (!code) {
+      return null;
+    }
+    const option = this.customerOptions().find((o) => o.value === code);
+    return option?.name ? `${option.name} (${option.code})` : code;
+  });
 
   ngOnInit(): void {
     const search = this.route.snapshot.queryParamMap.get('search');
@@ -86,6 +100,16 @@ export class OrdersListPage implements OnInit {
       this.searchText.set(search);
       this.appliedSearch.set(search);
     }
+    const customer = this.route.snapshot.queryParamMap.get('customer');
+    if (customer) {
+      this.customerFilter.set(customer);
+    }
+
+    this.customersService.getCustomers().subscribe({
+      next: (customers) => this.customerOptions.set(toCustomerOptions(customers)),
+      error: () => this.customerOptions.set([]),
+    });
+
     this.loadOrders();
   }
 
@@ -100,6 +124,7 @@ export class OrdersListPage implements OnInit {
         this.deepSearch(),
         this.monthParam(),
         this.paymentFilter(),
+        this.customerFilter() ?? '',
       )
       .pipe(finalize(() => this.loading.set(false)))
       .subscribe({
@@ -154,6 +179,12 @@ export class OrdersListPage implements OnInit {
 
   protected onPaymentFilterChange(value: '' | 'paid' | 'unpaid'): void {
     this.paymentFilter.set(value);
+    this.page.set(0);
+    this.loadOrders();
+  }
+
+  protected onCustomerFilterChange(value: string | null): void {
+    this.customerFilter.set(value || null);
     this.page.set(0);
     this.loadOrders();
   }
@@ -369,6 +400,7 @@ export class OrdersListPage implements OnInit {
               id: detail.order.id,
               orderNumber: detail.order.orderNumber,
               clientCode: detail.order.clientCode,
+              customerName: detail.order.customerName,
               paid: detail.paid,
               paymentStatus: detail.paymentStatus,
               commissionAmount: detail.commissionAmount,

@@ -12,6 +12,7 @@ import {
   UploadPanelConfig,
   UploadQueueItem,
 } from '../../../../core/models/upload.models';
+import { CustomersService } from '../../../../core/services/customers.service';
 import { DocumentUploadService } from '../../../../core/services/document-upload.service';
 import { DocumentUploadPanel } from '../../../../shared/components/document-upload-panel/document-upload-panel';
 import { UploadResultsTable } from '../../../../shared/components/upload-results-table/upload-results-table';
@@ -24,6 +25,7 @@ import { UploadResultsTable } from '../../../../shared/components/upload-results
 export class UploadsPage {
   private readonly route = inject(ActivatedRoute);
   private readonly uploadService = inject(DocumentUploadService);
+  private readonly customersService = inject(CustomersService);
   private readonly messages = inject(MessageService);
 
   protected readonly uploadQueue = signal<UploadQueueItem[]>([]);
@@ -102,6 +104,7 @@ export class UploadsPage {
       next: (result) => {
         this.applyUploadResults([result]);
         if (result.success) {
+          this.customersService.invalidate();
           const item = result.item as Record<string, unknown> | null;
           this.messages.add({
             severity: 'success',
@@ -157,6 +160,10 @@ export class UploadsPage {
         this.applyUploadResults(response);
         const successCount = response.filter((result) => result.success).length;
         const failureCount = response.length - successCount;
+        if (successCount > 0) {
+          // Ordini, fatture e pagamenti alimentano tutti il dizionario clienti derivato.
+          this.customersService.invalidate();
+        }
 
         this.messages.add({
           severity: failureCount ? 'warn' : 'success',

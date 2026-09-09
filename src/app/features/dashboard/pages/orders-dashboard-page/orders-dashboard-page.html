@@ -166,7 +166,9 @@
               <div class="grid gap-3 px-4 py-3 md:grid-cols-[minmax(0,1fr)_10rem] md:items-center">
                 <div class="min-w-0">
                   <p class="truncate font-semibold text-slate-900">{{ row.orderNumber }}</p>
-                  <p class="truncate text-sm text-slate-500">{{ row.clientCode || '-' }}</p>
+                  <p class="truncate text-sm text-slate-500">
+                    {{ row.customerName || row.clientCode || '-' }}
+                  </p>
                 </div>
                 <p-tag
                   [severity]="paymentStatusSeverity(row.paymentStatus)"
@@ -302,8 +304,11 @@
             <div class="rounded-md border border-slate-200 bg-white px-3 py-2">
               <p class="text-xs text-slate-500">Cliente</p>
               <p class="mt-0.5 truncate font-semibold text-slate-950">
-                {{ detail.order.clientCode || '-' }}
+                {{ detail.order.customerName || detail.order.clientCode || '-' }}
               </p>
+              @if (detail.order.customerName && detail.order.clientCode) {
+                <p class="truncate text-xs text-slate-500">{{ detail.order.clientCode }}</p>
+              }
             </div>
             <div class="rounded-md border border-slate-200 bg-white px-3 py-2">
               <p class="text-xs text-slate-500">Intervento</p>

@@ -14,6 +14,7 @@ export class PaidOrderItemsService {
     size: number,
     search = '',
     month = '',
+    customer = '',
   ): Observable<PaidOrderItemsPageResponse> {
     let params = new HttpParams().set('page', page).set('size', size);
 
@@ -23,6 +24,10 @@ export class PaidOrderItemsService {
 
     if (month) {
       params = params.set('month', month);
+    }
+
+    if (customer) {
+      params = params.set('customer', customer);
     }
 
     return this.http.get<PaidOrderItemsPageResponse>(`${environment.apiBaseUrl}/paid-order-items`, { params });

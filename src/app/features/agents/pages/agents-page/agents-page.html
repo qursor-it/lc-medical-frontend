@@ -265,11 +265,23 @@
                                     class="text-xs font-medium uppercase tracking-wide text-slate-400 sm:hidden"
                                     >Cliente</span
                                   >
-                                  <span
-                                    class="cell-clip text-slate-700"
-                                    [title]="order.customerName || order.clientCode"
-                                    >{{ order.customerName || order.clientCode || '—' }}</span
-                                  >
+                                  @if (order.clientCode) {
+                                    <span
+                                      class="cell-clip text-slate-700 hover:text-teal-700 hover:underline"
+                                      [title]="'Vedi gli ordini di ' + (order.customerName || order.clientCode)"
+                                      (click)="openCustomer(order, $event)"
+                                      >{{ order.customerName || order.clientCode }}</span
+                                    >
+                                  } @else {
+                                    <span class="cell-clip text-slate-700">—</span>
+                                  }
+                                  @if (order.payerName) {
+                                    <span
+                                      class="cell-clip block text-xs text-slate-400"
+                                      [title]="'Pagato da ' + order.payerName"
+                                      >pagato da {{ order.payerName }}</span
+                                    >
+                                  }
                                 </div>
                                 <div
                                   class="flex items-center justify-between gap-2 tabular-nums text-slate-600 sm:block sm:text-right"
@@ -396,7 +408,16 @@
                                   class="text-xs font-medium uppercase tracking-wide text-slate-400 sm:hidden"
                                   >Cliente</span
                                 >
-                                <span class="text-slate-700">{{ order.clientCode || '—' }}</span>
+                                @if (order.clientCode) {
+                                  <span
+                                    class="text-slate-700 hover:text-teal-700 hover:underline"
+                                    [title]="'Vedi gli ordini di ' + (order.customerName || order.clientCode)"
+                                    (click)="openCustomer(order, $event)"
+                                    >{{ order.customerName || order.clientCode }}</span
+                                  >
+                                } @else {
+                                  <span class="text-slate-700">—</span>
+                                }
                               </div>
                               <div class="flex items-center justify-between gap-2 sm:block">
                                 <span
