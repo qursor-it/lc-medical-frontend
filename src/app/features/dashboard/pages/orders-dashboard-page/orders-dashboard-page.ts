@@ -53,17 +53,11 @@ export class OrdersDashboardPage implements OnInit {
   protected readonly paidOrders = computed(
     () => this.orders().filter((order) => this.paymentStatus(order) === 'PAID').length,
   );
-  protected readonly partialOrders = computed(
-    () => this.orders().filter((order) => this.paymentStatus(order) === 'PARTIAL').length,
-  );
   protected readonly unpaidOrders = computed(
     () => this.orders().filter((order) => this.paymentStatus(order) === 'UNPAID').length,
   );
   protected readonly paidPercentage = computed(() =>
     this.percentage(this.paidOrders(), this.loadedItems()),
-  );
-  protected readonly partialPercentage = computed(() =>
-    this.percentage(this.partialOrders(), this.loadedItems()),
   );
   protected readonly unpaidPercentage = computed(() =>
     this.percentage(this.unpaidOrders(), this.loadedItems()),
@@ -278,8 +272,6 @@ export class OrdersDashboardPage implements OnInit {
     switch (status) {
       case 'PAID':
         return 'Pagato';
-      case 'PARTIAL':
-        return 'Parziale';
       case 'UNPAID':
       default:
         return 'Non pagato';
@@ -292,8 +284,6 @@ export class OrdersDashboardPage implements OnInit {
     switch (status) {
       case 'PAID':
         return 'success';
-      case 'PARTIAL':
-        return 'warn';
       case 'UNPAID':
       default:
         return 'danger';

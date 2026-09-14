@@ -8,7 +8,7 @@ export interface PageResponse<T> {
   hasPrevious: boolean;
 }
 
-export type PaymentStatus = 'UNPAID' | 'PARTIAL' | 'PAID';
+export type PaymentStatus = 'UNPAID' | 'PAID';
 
 export interface OrderListItem {
   id: number;
@@ -101,7 +101,7 @@ export interface InvoiceSummary {
   total: number | null;
 }
 
-export type AgentPaymentStatus = 'PAID' | 'PARTIAL' | 'UNPAID';
+export type AgentPaymentStatus = 'PAID' | 'UNPAID';
 
 export interface AgentPaymentDetail {
   documentNumber: string | null;

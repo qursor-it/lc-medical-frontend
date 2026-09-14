@@ -355,8 +355,6 @@ export class OrdersListPage implements OnInit {
     switch (status) {
       case 'PAID':
         return 'Pagato';
-      case 'PARTIAL':
-        return 'Parziale';
       case 'UNPAID':
       default:
         return 'Non pagato';
@@ -369,8 +367,6 @@ export class OrdersListPage implements OnInit {
     switch (status) {
       case 'PAID':
         return 'success';
-      case 'PARTIAL':
-        return 'warn';
       case 'UNPAID':
       default:
         return 'danger';
