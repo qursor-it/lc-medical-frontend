@@ -5,22 +5,38 @@ import { Router } from '@angular/router';
 import { MessageService } from 'primeng/api';
 import { ButtonModule } from 'primeng/button';
 import { DatePickerModule } from 'primeng/datepicker';
+import { DialogModule } from 'primeng/dialog';
 import { SelectModule } from 'primeng/select';
 import { TableModule } from 'primeng/table';
 import { TagModule } from 'primeng/tag';
-import { finalize } from 'rxjs';
+import { finalize, switchMap, throwError } from 'rxjs';
 
 import {
   AgentCommissionSummary,
   AgentOrderCommission,
   AgentPaymentStatus,
   CommissionSummaryResponse,
+  OrderPaymentStatusResponse,
+  PaymentStatus,
 } from '../../../../core/models/order.models';
 import { OrdersService } from '../../../../core/services/orders.service';
+import {
+  lineStatusClass,
+  lineStatusLabel,
+  lineStatusTitle,
+} from '../../../../shared/line-status';
 
 @Component({
   selector: 'app-agents-page',
-  imports: [ButtonModule, DatePickerModule, FormsModule, SelectModule, TableModule, TagModule],
+  imports: [
+    ButtonModule,
+    DatePickerModule,
+    DialogModule,
+    FormsModule,
+    SelectModule,
+    TableModule,
+    TagModule,
+  ],
   templateUrl: './agents-page.html',
 })
 export class AgentsPage implements OnInit {
@@ -36,6 +52,9 @@ export class AgentsPage implements OnInit {
   protected readonly expandedAgent = signal<string | null>(null);
   protected readonly expandedMonths = signal<ReadonlySet<string>>(new Set());
   protected readonly skeletonRows = Array.from({ length: 8 });
+  protected readonly detailLoading = signal(false);
+  protected readonly detailVisible = signal(false);
+  protected readonly selectedOrder = signal<OrderPaymentStatusResponse | null>(null);
 
   protected readonly presetOptions = [
     { label: 'Tutto', value: 'all' },
@@ -146,7 +165,28 @@ export class AgentsPage implements OnInit {
   }
 
   protected openOrder(order: AgentOrderCommission): void {
-    this.router.navigate(['/orders'], { queryParams: { search: order.orderNumber } });
+    this.detailVisible.set(true);
+    this.detailLoading.set(true);
+    this.selectedOrder.set(null);
+
+    this.orderDetailRequest(order)
+      .pipe(finalize(() => this.detailLoading.set(false)))
+      .subscribe({
+        next: (detail) => this.selectedOrder.set(detail),
+        error: (error: HttpErrorResponse | Error) => {
+          this.detailVisible.set(false);
+          this.messages.add({
+            severity: 'error',
+            summary: 'Dettaglio ordine non caricato',
+            detail: this.errorMessage(error),
+          });
+        },
+      });
+  }
+
+  protected closeDetail(): void {
+    this.detailVisible.set(false);
+    this.selectedOrder.set(null);
   }
 
   /** Apre gli ordini del cliente. Ferma la propagazione: la riga ha già un click su openOrder. */
@@ -192,7 +232,29 @@ export class AgentsPage implements OnInit {
     }).format(new Date(value));
   }
 
-  protected paymentStatusLabel(status: AgentPaymentStatus | null | undefined): string {
+  protected formatPaidMonth(value: string | null): string {
+    if (!value) {
+      return '-';
+    }
+
+    return new Intl.DateTimeFormat('it-IT', { month: 'long', year: 'numeric' }).format(
+      new Date(value),
+    );
+  }
+
+  protected formatNumber(value: number | null): string {
+    if (value == null) {
+      return '-';
+    }
+
+    return new Intl.NumberFormat('it-IT', {
+      maximumFractionDigits: 2,
+    }).format(value);
+  }
+
+  protected paymentStatusLabel(
+    status: AgentPaymentStatus | PaymentStatus | null | undefined,
+  ): string {
     switch (status) {
       case 'PAID':
         return 'Pagato';
@@ -203,7 +265,7 @@ export class AgentsPage implements OnInit {
   }
 
   protected paymentStatusSeverity(
-    status: AgentPaymentStatus | null | undefined,
+    status: AgentPaymentStatus | PaymentStatus | null | undefined,
   ): 'success' | 'warn' | 'danger' {
     switch (status) {
       case 'PAID':
@@ -212,6 +274,29 @@ export class AgentsPage implements OnInit {
       default:
         return 'danger';
     }
+  }
+
+  protected readonly lineStatusLabel = lineStatusLabel;
+  protected readonly lineStatusClass = lineStatusClass;
+  protected readonly lineStatusTitle = lineStatusTitle;
+
+  private orderDetailRequest(order: AgentOrderCommission) {
+    if (order.orderId != null) {
+      return this.ordersService.getOrderDetail(order.orderId);
+    }
+
+    return this.ordersService.getOrders(0, 20, order.orderNumber, true).pipe(
+      switchMap((response) => {
+        const expectedNumber = order.orderNumber.trim();
+        const match = response.items.find(
+          (item) => item.orderNumber.trim() === expectedNumber,
+        );
+
+        return match
+          ? this.ordersService.getOrderDetail(match.id)
+          : throwError(() => new Error(`Ordine ${order.orderNumber} non trovato.`));
+      }),
+    );
   }
 
   private agentKey(row: AgentCommissionSummary): string {
@@ -265,9 +350,13 @@ export class AgentsPage implements OnInit {
     return `${year}-${month}`;
   }
 
-  private errorMessage(error: HttpErrorResponse): string {
-    if (typeof error.error?.error === 'string') {
+  private errorMessage(error: HttpErrorResponse | Error): string {
+    if (error instanceof HttpErrorResponse && typeof error.error?.error === 'string') {
       return error.error.error;
+    }
+
+    if (error instanceof Error && error.message) {
+      return error.message;
     }
 
     return 'Operazione non riuscita. Controlla la connessione e riprova.';
