@@ -16,6 +16,7 @@ import {
   AgentOrderCommission,
   AgentPaymentStatus,
   CommissionSummaryResponse,
+  OrderLineSummary,
   OrderPaymentStatusResponse,
   PaymentStatus,
 } from '../../../../core/models/order.models';
@@ -165,16 +166,28 @@ export class AgentsPage implements OnInit {
   }
 
   protected openOrder(order: AgentOrderCommission): void {
-    this.detailVisible.set(true);
+    this.detailVisible.set(false);
     this.detailLoading.set(true);
     this.selectedOrder.set(null);
+
+    if (order.orderId == null && order.paymentStatus == null) {
+      this.detailLoading.set(false);
+      this.messages.add({
+        severity: 'error',
+        summary: 'Ordine non disponibile',
+        detail: "L'ordine " + order.orderNumber + " non esiste nella lista ordini.",
+      });
+      return;
+    }
 
     this.orderDetailRequest(order)
       .pipe(finalize(() => this.detailLoading.set(false)))
       .subscribe({
-        next: (detail) => this.selectedOrder.set(detail),
+        next: (detail) => {
+          this.selectedOrder.set(detail);
+          this.detailVisible.set(true);
+        },
         error: (error: HttpErrorResponse | Error) => {
-          this.detailVisible.set(false);
           this.messages.add({
             severity: 'error',
             summary: 'Dettaglio ordine non caricato',
@@ -250,6 +263,44 @@ export class AgentsPage implements OnInit {
     return new Intl.NumberFormat('it-IT', {
       maximumFractionDigits: 2,
     }).format(value);
+  }
+
+  protected displayOrderLines(detail: OrderPaymentStatusResponse): OrderLineSummary[] {
+    return detail.order.lines.flatMap((line) => {
+      const orderedQuantity = line.quantita;
+      const netPaidQuantity = Math.max(
+        0,
+        (line.paidQuantity ?? 0) - (line.creditedQuantity ?? 0),
+      );
+      const returnedQuantity = (orderedQuantity ?? 0) - netPaidQuantity;
+
+      if (
+        line.lineStatus !== 'PARTIAL' ||
+        orderedQuantity == null ||
+        orderedQuantity <= 1 ||
+        netPaidQuantity <= 0 ||
+        returnedQuantity <= 0
+      ) {
+        return [line];
+      }
+
+      return [
+        {
+          ...line,
+          quantita: netPaidQuantity,
+          paidQuantity: netPaidQuantity,
+          creditedQuantity: 0,
+          lineStatus: 'PAID',
+        },
+        {
+          ...line,
+          quantita: returnedQuantity,
+          paidQuantity: 0,
+          creditedQuantity: returnedQuantity,
+          lineStatus: 'CREDITED',
+        },
+      ];
+    });
   }
 
   protected paymentStatusLabel(
