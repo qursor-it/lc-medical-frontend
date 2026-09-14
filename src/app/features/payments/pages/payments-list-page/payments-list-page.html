@@ -21,8 +21,8 @@
         icon="pi pi-refresh"
         label="Aggiorna"
         severity="secondary"
-        [loading]="loading()"
-        (click)="loadPayments()"
+        [loading]="loading() || recentFilesLoading()"
+        (click)="refresh()"
       ></button>
     </div>
   </div>
@@ -43,6 +43,54 @@
       <p class="mt-1 text-2xl font-semibold text-slate-950">{{ formatCurrency(pageTotal()) }}</p>
     </article>
   </div>
+
+  <section class="rounded-md border border-slate-200 bg-white p-4 shadow-sm">
+    <div class="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
+      <div>
+        <h2 class="text-base font-semibold text-slate-950">Ultimi 5 file pagamenti caricati</h2>
+        <p class="mt-0.5 text-sm text-slate-500">
+          Il nome del file aiuta a verificare fino a quale export è stato importato.
+        </p>
+      </div>
+      @if (recentFilesLoading()) {
+        <span class="inline-flex items-center gap-2 text-xs font-semibold text-teal-700">
+          <i class="pi pi-spin pi-spinner"></i>
+          Caricamento
+        </span>
+      }
+    </div>
+
+    @if (recentFilesLoading() && recentFiles().length === 0) {
+      <div class="mt-4 grid gap-2">
+        @for (item of [1, 2, 3]; track item) {
+          <div class="h-12 animate-pulse rounded-md bg-slate-100"></div>
+        }
+      </div>
+    } @else if (recentFiles().length === 0) {
+      <p class="mt-4 rounded-md bg-slate-50 px-3 py-3 text-sm text-slate-500">
+        Nessun file pagamenti caricato.
+      </p>
+    } @else {
+      <ul class="mt-4 grid gap-2">
+        @for (file of recentFiles(); track file.fileName) {
+          <li
+            class="flex min-w-0 flex-col gap-1 rounded-md border border-slate-200 px-3 py-2 sm:flex-row sm:items-center sm:justify-between sm:gap-4"
+          >
+            <div class="flex min-w-0 items-center gap-2">
+              <i class="pi pi-file-excel shrink-0 text-teal-700"></i>
+              <span class="truncate text-sm font-medium text-slate-900" [title]="file.fileName">
+                {{ file.fileName }}
+              </span>
+            </div>
+            <span class="shrink-0 text-xs text-slate-500">
+              {{ formatImportedAt(file.importedAt) }} ·
+              {{ formatNumber(file.rowCount) }} righe archiviate
+            </span>
+          </li>
+        }
+      </ul>
+    }
+  </section>
 
   <div
     class="relative overflow-hidden rounded-md border border-slate-200 bg-white shadow-sm"

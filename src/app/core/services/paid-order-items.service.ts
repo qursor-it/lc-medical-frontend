@@ -2,7 +2,10 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 
-import { PaidOrderItemsPageResponse } from '../models/paid-order-item.models';
+import {
+  PaidOrderItemFileSummary,
+  PaidOrderItemsPageResponse,
+} from '../models/paid-order-item.models';
 import { environment } from '../../../environments/environment';
 
 @Injectable({ providedIn: 'root' })
@@ -31,5 +34,13 @@ export class PaidOrderItemsService {
     }
 
     return this.http.get<PaidOrderItemsPageResponse>(`${environment.apiBaseUrl}/paid-order-items`, { params });
+  }
+
+  getRecentFiles(limit = 5): Observable<PaidOrderItemFileSummary[]> {
+    const params = new HttpParams().set('limit', limit);
+    return this.http.get<PaidOrderItemFileSummary[]>(
+      `${environment.apiBaseUrl}/paid-order-items/recent-files`,
+      { params },
+    );
   }
 }

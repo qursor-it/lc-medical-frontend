@@ -26,4 +26,10 @@ export interface PaidOrderItem {
   importedAt: string;
 }
 
+export interface PaidOrderItemFileSummary {
+  fileName: string;
+  importedAt: string;
+  rowCount: number;
+}
+
 export type PaidOrderItemsPageResponse = PageResponse<PaidOrderItem>;

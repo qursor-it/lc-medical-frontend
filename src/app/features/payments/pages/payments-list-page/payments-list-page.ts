@@ -12,6 +12,7 @@ import { TagModule } from 'primeng/tag';
 import { finalize } from 'rxjs';
 
 import {
+  PaidOrderItemFileSummary,
   PaidOrderItem,
   PaidOrderItemsPageResponse,
 } from '../../../../core/models/paid-order-item.models';
@@ -44,6 +45,8 @@ export class PaymentsListPage implements OnInit {
   protected readonly page = signal(0);
   protected readonly size = signal(20);
   protected readonly totalItems = signal(0);
+  protected readonly recentFiles = signal<PaidOrderItemFileSummary[]>([]);
+  protected readonly recentFilesLoading = signal(false);
   protected readonly skeletonRows = Array.from({ length: 8 });
   protected readonly searchText = signal('');
   protected readonly appliedSearch = signal('');
@@ -85,6 +88,7 @@ export class PaymentsListPage implements OnInit {
     });
 
     this.loadPayments();
+    this.loadRecentFiles();
   }
 
   protected loadPayments(): void {
@@ -110,6 +114,29 @@ export class PaymentsListPage implements OnInit {
           });
         },
       });
+  }
+
+  protected loadRecentFiles(): void {
+    this.recentFilesLoading.set(true);
+    this.paidOrderItemsService
+      .getRecentFiles(5)
+      .pipe(finalize(() => this.recentFilesLoading.set(false)))
+      .subscribe({
+        next: (files) => this.recentFiles.set(files ?? []),
+        error: (error: HttpErrorResponse) => {
+          this.recentFiles.set([]);
+          this.messages.add({
+            severity: 'error',
+            summary: 'File pagamenti non caricati',
+            detail: this.errorMessage(error),
+          });
+        },
+      });
+  }
+
+  protected refresh(): void {
+    this.loadPayments();
+    this.loadRecentFiles();
   }
 
   protected onPageChange(event: PaginatorState): void {
@@ -174,6 +201,22 @@ export class PaymentsListPage implements OnInit {
     return new Intl.NumberFormat('it-IT', {
       maximumFractionDigits: 2,
     }).format(value);
+  }
+
+  protected formatImportedAt(value: string | null): string {
+    if (!value) {
+      return '-';
+    }
+
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) {
+      return value;
+    }
+
+    return new Intl.DateTimeFormat('it-IT', {
+      dateStyle: 'short',
+      timeStyle: 'short',
+    }).format(date);
   }
 
   private formatMonthLabel(date: Date | null): string {
