@@ -4,6 +4,8 @@ import { Observable } from 'rxjs';
 
 import {
   CommissionSummaryResponse,
+  AgentInvoicingStatusRequest,
+  InvoicingStatus,
   OrderListItem,
   OrderPaymentStatusResponse,
   PageResponse,
@@ -42,14 +44,20 @@ export class OrdersService {
       params = params.set('customer', customer);
     }
 
-    return this.http.get<PageResponse<OrderListItem>>(`${environment.apiBaseUrl}/orders`, { params });
+    return this.http.get<PageResponse<OrderListItem>>(`${environment.apiBaseUrl}/orders`, {
+      params,
+    });
   }
 
   getOrderDetail(id: number): Observable<OrderPaymentStatusResponse> {
     return this.http.get<OrderPaymentStatusResponse>(`${environment.apiBaseUrl}/orders/${id}`);
   }
 
-  getCommissionSummary(from = '', to = ''): Observable<CommissionSummaryResponse> {
+  getCommissionSummary(
+    from = '',
+    to = '',
+    invoicingStatus: InvoicingStatus = 'ALL',
+  ): Observable<CommissionSummaryResponse> {
     let params = new HttpParams();
     if (from) {
       params = params.set('from', from);
@@ -57,14 +65,24 @@ export class OrdersService {
     if (to) {
       params = params.set('to', to);
     }
+    if (invoicingStatus !== 'ALL') {
+      params = params.set('invoicingStatus', invoicingStatus);
+    }
     return this.http.get<CommissionSummaryResponse>(
       `${environment.apiBaseUrl}/orders/commission-summary`,
       { params },
     );
   }
 
+  updateAgentInvoicingStatus(request: AgentInvoicingStatusRequest): Observable<void> {
+    return this.http.put<void>(`${environment.apiBaseUrl}/orders/agent-invoicing-status`, request);
+  }
+
   updateOrder(id: number, request: UpdateOrderRequest): Observable<OrderPaymentStatusResponse> {
-    return this.http.put<OrderPaymentStatusResponse>(`${environment.apiBaseUrl}/orders/${id}`, request);
+    return this.http.put<OrderPaymentStatusResponse>(
+      `${environment.apiBaseUrl}/orders/${id}`,
+      request,
+    );
   }
 
   deleteOrder(id: number): Observable<void> {

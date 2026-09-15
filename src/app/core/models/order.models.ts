@@ -18,6 +18,7 @@ export interface OrderListItem {
   paid: boolean;
   paymentStatus: PaymentStatus;
   commissionAmount: number | null;
+  agentInvoicedAt?: string | null;
   uploadedByUserId: number | null;
   uploadedByName: string | null;
 }
@@ -27,6 +28,8 @@ export interface OrderPaymentStatusResponse {
   paid: boolean;
   paymentStatus: PaymentStatus;
   paidAt: string | null;
+  /** Timestamp set by an administrator when the agent commission was invoiced. */
+  agentInvoicedAt?: string | null;
   paidAmount: number | null;
   commissionRatePercent: number | null;
   commissionAmount: number | null;
@@ -54,6 +57,8 @@ export interface OrderSummary {
   representative: string | null;
   lines: OrderLineSummary[];
   comments: string | null;
+  /** Kept optional for compatibility with API versions that expose it on the order summary. */
+  agentInvoicedAt?: string | null;
 }
 
 export interface UpdateOrderRequest {
@@ -103,6 +108,13 @@ export interface InvoiceSummary {
 
 export type AgentPaymentStatus = 'PAID' | 'UNPAID';
 
+export type InvoicingStatus = 'ALL' | 'INVOICED' | 'NOT_INVOICED';
+
+export interface AgentInvoicingStatusRequest {
+  orderIds: number[];
+  invoiced: boolean;
+}
+
 export interface AgentPaymentDetail {
   documentNumber: string | null;
   postingDate: string | null;
@@ -119,6 +131,8 @@ export interface AgentOrderCommission {
   paidAmount: number | null;
   commissionAmount: number | null;
   paymentStatus: AgentPaymentStatus | null; // null only for "Non attribuito" orders
+  /** Timestamp set by an administrator when the agent commission was invoiced. */
+  agentInvoicedAt?: string | null;
   payments: AgentPaymentDetail[];
 }
 

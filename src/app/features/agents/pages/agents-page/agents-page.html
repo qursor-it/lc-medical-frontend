@@ -57,6 +57,27 @@
                 [severity]="paymentStatusSeverity(detail.paymentStatus)"
                 [value]="paymentStatusLabel(detail.paymentStatus)"
               />
+              <p-tag
+                [severity]="detailInvoicingStatusSeverity(detail)"
+                [value]="detailInvoicingStatusLabel(detail)"
+              />
+              @if (isAdmin() && detail.paymentStatus === 'PAID') {
+                <button
+                  pButton
+                  type="button"
+                  size="small"
+                  severity="secondary"
+                  [text]="true"
+                  [loading]="invoicingUpdating() && invoicingOrderId() === detail.order.id"
+                  [label]="isDetailInvoiced(detail) ? 'Rimuovi fatturato' : 'Segna fatturato'"
+                  [attr.aria-label]="
+                    isDetailInvoiced(detail)
+                      ? 'Rimuovi stato fatturato dall\'ordine'
+                      : 'Segna ordine come fatturato'
+                  "
+                  (click)="updateDetailInvoicing(detail, $event)"
+                ></button>
+              }
             </div>
             @if (detail.paidAt || detail.commissionAmount) {
               <div class="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-slate-600">
@@ -74,9 +95,7 @@
                       formatCurrency(detail.commissionAmount)
                     }}</strong>
                     @if (detail.paidAmount) {
-                      <span class="text-slate-400"
-                        >su {{ formatCurrency(detail.paidAmount) }}</span
-                      >
+                      <span class="text-slate-400">su {{ formatCurrency(detail.paidAmount) }}</span>
                     }
                   </span>
                 }
@@ -358,9 +377,73 @@
               inputStyleClass="w-full"
             />
           </div>
+          <p-select
+            appendTo="body"
+            [options]="invoicingFilterOptions"
+            optionLabel="label"
+            optionValue="value"
+            [ngModel]="invoicingFilter()"
+            (ngModelChange)="onInvoicingFilterChange($event)"
+            [disabled]="loading()"
+            placeholder="Fatturazione"
+            styleClass="w-full lg:w-44"
+            ariaLabel="Filtro fatturazione"
+          />
         </div>
       </div>
     </div>
+
+    @if (isAdmin() && selectedOrderCount() > 0) {
+      <div
+        class="border-b border-teal-200 bg-teal-50 px-4 py-3"
+        role="region"
+        aria-label="Azioni sugli ordini selezionati"
+        aria-live="polite"
+      >
+        <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div class="flex items-center gap-2 text-sm font-semibold text-teal-950">
+            <i class="pi pi-check-square text-teal-700" aria-hidden="true"></i>
+            <span>
+              {{ selectedOrderCount() }}
+              {{ selectedOrderCount() === 1 ? 'ordine selezionato' : 'ordini selezionati' }}
+            </span>
+          </div>
+          <div class="flex flex-wrap gap-2">
+            <button
+              pButton
+              type="button"
+              size="small"
+              icon="pi pi-check"
+              label="Segna fatturati"
+              severity="success"
+              [loading]="invoicingUpdating()"
+              [disabled]="invoicingUpdating()"
+              (click)="updateSelectedInvoicing(true)"
+            ></button>
+            <button
+              pButton
+              type="button"
+              size="small"
+              icon="pi pi-undo"
+              label="Rimuovi fatturato"
+              severity="secondary"
+              [disabled]="invoicingUpdating()"
+              (click)="updateSelectedInvoicing(false)"
+            ></button>
+            <button
+              pButton
+              type="button"
+              size="small"
+              label="Deseleziona"
+              severity="secondary"
+              [text]="true"
+              [disabled]="invoicingUpdating()"
+              (click)="clearSelection()"
+            ></button>
+          </div>
+        </div>
+      </div>
+    }
 
     @if (loading()) {
       <div class="border-b border-slate-200 bg-slate-50 px-4 py-3">
@@ -373,7 +456,7 @@
     <p-table
       [value]="loading() ? skeletonRows : agents()"
       styleClass="data-table pretty-table mobile-card-table text-sm"
-      [tableStyle]="{ 'min-width': '46rem' }"
+      [tableStyle]="{ 'min-width': '68rem' }"
     >
       <ng-template pTemplate="header">
         <tr>
@@ -410,20 +493,41 @@
             (keydown.enter)="toggleAgent(row)"
           >
             <td class="mobile-card-primary">
-              <div class="flex min-w-0 items-center gap-3">
-                <div
-                  class="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-teal-50 text-teal-700"
-                >
-                  <i class="pi pi-id-card text-sm"></i>
+              <div class="flex min-w-0 items-start justify-between gap-3">
+                <div class="flex min-w-0 items-center gap-3">
+                  <div
+                    class="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-teal-50 text-teal-700"
+                  >
+                    <i class="pi pi-id-card text-sm"></i>
+                  </div>
+                  <div class="min-w-0">
+                    <span class="cell-clip font-semibold text-slate-950" [title]="row.agentName">{{
+                      row.agentName
+                    }}</span>
+                    @if (row.agentEmail) {
+                      <span class="mt-0.5 block text-xs text-slate-500">{{ row.agentEmail }}</span>
+                    }
+                  </div>
                 </div>
-                <div class="min-w-0">
-                  <span class="cell-clip font-semibold text-slate-950" [title]="row.agentName">{{
-                    row.agentName
-                  }}</span>
-                  @if (row.agentEmail) {
-                    <span class="mt-0.5 block text-xs text-slate-500">{{ row.agentEmail }}</span>
-                  }
-                </div>
+                @if (isAdmin() && hasSelectableOrders(row)) {
+                  <div
+                    class="flex shrink-0 items-center gap-2 rounded-md px-1 py-1 text-xs font-semibold text-teal-800 hover:bg-teal-50"
+                    (click)="$event.stopPropagation()"
+                  >
+                    <input
+                      type="checkbox"
+                      class="h-4 w-4 cursor-pointer rounded border-slate-300 accent-teal-700 focus:outline-none focus:ring-2 focus:ring-teal-600 focus:ring-offset-2"
+                      [id]="agentSelectionId(row)"
+                      [checked]="isAgentFullySelected(row)"
+                      [indeterminate]="isAgentPartiallySelected(row)"
+                      [attr.aria-label]="'Seleziona tutti gli ordini pagati di ' + row.agentName"
+                      (change)="toggleAgentSelection(row, $event)"
+                    />
+                    <label class="cursor-pointer whitespace-nowrap" [for]="agentSelectionId(row)">
+                      {{ isAgentFullySelected(row) ? 'Deseleziona tutti' : 'Seleziona tutti' }}
+                    </label>
+                  </div>
+                }
               </div>
             </td>
             <td data-label="Ordini" class="text-right tabular-nums text-slate-900">
@@ -484,13 +588,15 @@
                     @if (isMonthExpanded(row, monthRow.month)) {
                       <div class="ml-1.5 mt-2 border-l-2 border-slate-200 pl-3">
                         <div
-                          class="hidden sm:grid sm:grid-cols-[minmax(0,1.1fr)_minmax(0,1.3fr)_7rem_7rem_6rem] sm:items-center sm:gap-3 sm:px-2 sm:pb-1.5 sm:text-xs sm:font-medium sm:uppercase sm:tracking-wide sm:text-slate-400"
+                          class="hidden sm:grid sm:grid-cols-[2rem_minmax(0,1.1fr)_minmax(0,1.3fr)_7rem_7rem_7rem_minmax(10rem,1fr)] sm:items-center sm:gap-3 sm:px-2 sm:pb-1.5 sm:text-xs sm:font-medium sm:uppercase sm:tracking-wide sm:text-slate-400"
                         >
+                          <span>Seleziona</span>
                           <span>Ordine</span>
                           <span>Cliente</span>
                           <span class="text-right">Incassato</span>
                           <span class="text-right">Compenso</span>
-                          <span>Stato</span>
+                          <span>Pagamento</span>
+                          <span>Fatturazione</span>
                         </div>
 
                         <div
@@ -499,10 +605,34 @@
                           @for (order of monthRow.orders; track order.orderNumber) {
                             <div class="px-2 py-2 transition-colors hover:bg-slate-50">
                               <div
-                                class="flex cursor-pointer flex-col gap-1 sm:grid sm:grid-cols-[minmax(0,1.1fr)_minmax(0,1.3fr)_7rem_7rem_6rem] sm:items-center sm:gap-3"
+                                class="flex cursor-pointer flex-col gap-1 sm:grid sm:grid-cols-[2rem_minmax(0,1.1fr)_minmax(0,1.3fr)_7rem_7rem_7rem_minmax(10rem,1fr)] sm:items-center sm:gap-3"
                                 (click)="openOrder(order)"
                               >
+                                <div
+                                  class="flex items-center justify-between gap-2 sm:block"
+                                  (click)="$event.stopPropagation()"
+                                >
+                                  <span
+                                    class="text-xs font-medium uppercase tracking-wide text-slate-400 sm:hidden"
+                                    >Seleziona</span
+                                  >
+                                  @if (canManageInvoicing(order)) {
+                                    <input
+                                      type="checkbox"
+                                      class="h-4 w-4 cursor-pointer rounded border-slate-300 accent-teal-700 focus:outline-none focus:ring-2 focus:ring-teal-600 focus:ring-offset-2"
+                                      [checked]="isOrderSelected(order)"
+                                      [attr.aria-label]="'Seleziona ordine ' + order.orderNumber"
+                                      (change)="toggleOrderSelection(order, $event)"
+                                    />
+                                  } @else {
+                                    <span class="text-slate-300" aria-hidden="true">—</span>
+                                  }
+                                </div>
                                 <div class="flex items-center justify-between gap-2 sm:block">
+                                  <span
+                                    class="text-xs font-medium uppercase tracking-wide text-slate-400 sm:hidden"
+                                    >Ordine</span
+                                  >
                                   <span class="font-mono font-semibold text-slate-900">{{
                                     order.orderNumber
                                   }}</span>
@@ -515,7 +645,10 @@
                                   @if (order.clientCode) {
                                     <span
                                       class="cell-clip text-slate-700 hover:text-teal-700 hover:underline"
-                                      [title]="'Vedi gli ordini di ' + (order.customerName || order.clientCode)"
+                                      [title]="
+                                        'Vedi gli ordini di ' +
+                                        (order.customerName || order.clientCode)
+                                      "
                                       (click)="openCustomer(order, $event)"
                                       >{{ order.customerName || order.clientCode }}</span
                                     >
@@ -551,7 +684,7 @@
                                 <div class="flex items-center justify-between gap-2 sm:block">
                                   <span
                                     class="text-xs font-medium uppercase tracking-wide text-slate-400 sm:hidden"
-                                    >Stato</span
+                                    >Pagamento</span
                                   >
                                   @if (order.paymentStatus) {
                                     <p-tag
@@ -565,6 +698,43 @@
                                       >Sconosciuto</span
                                     >
                                   }
+                                </div>
+                                <div
+                                  class="flex flex-wrap items-center justify-between gap-2 sm:block"
+                                  (click)="$event.stopPropagation()"
+                                >
+                                  <span
+                                    class="text-xs font-medium uppercase tracking-wide text-slate-400 sm:hidden"
+                                    >Fatturazione</span
+                                  >
+                                  <div class="flex flex-wrap items-center gap-2 sm:justify-between">
+                                    <p-tag
+                                      [severity]="invoicingStatusSeverity(order)"
+                                      [value]="invoicingStatusLabel(order)"
+                                    />
+                                    @if (canManageInvoicing(order)) {
+                                      <button
+                                        pButton
+                                        type="button"
+                                        size="small"
+                                        severity="secondary"
+                                        [text]="true"
+                                        class="!px-1.5 !py-1"
+                                        [loading]="
+                                          invoicingUpdating() &&
+                                          invoicingOrderId() === order.orderId
+                                        "
+                                        [disabled]="invoicingUpdating()"
+                                        [attr.aria-label]="
+                                          isInvoiced(order)
+                                            ? 'Rimuovi stato fatturato da ' + order.orderNumber
+                                            : 'Segna come fatturato ' + order.orderNumber
+                                        "
+                                        [icon]="isInvoiced(order) ? 'pi pi-undo' : 'pi pi-check'"
+                                        (click)="updateOrderInvoicing(order, $event)"
+                                      ></button>
+                                    }
+                                  </div>
                                 </div>
                               </div>
 
@@ -626,11 +796,12 @@
 
                     <div class="ml-1.5 mt-2 border-l-2 border-amber-200 pl-3">
                       <div
-                        class="hidden sm:grid sm:grid-cols-[1.1fr_1.3fr_auto] sm:items-center sm:gap-3 sm:px-2 sm:pb-1.5 sm:text-xs sm:font-medium sm:uppercase sm:tracking-wide sm:text-slate-400"
+                        class="hidden sm:grid sm:grid-cols-[1.1fr_1.3fr_7rem_minmax(9rem,1fr)] sm:items-center sm:gap-3 sm:px-2 sm:pb-1.5 sm:text-xs sm:font-medium sm:uppercase sm:tracking-wide sm:text-slate-400"
                       >
                         <span>Ordine</span>
                         <span>Cliente</span>
-                        <span>Stato</span>
+                        <span>Pagamento</span>
+                        <span>Fatturazione</span>
                       </div>
 
                       <div
@@ -642,7 +813,7 @@
                         ) {
                           <div class="px-2 py-2 transition-colors hover:bg-slate-50">
                             <div
-                              class="flex cursor-pointer flex-col gap-1 sm:grid sm:grid-cols-[1.1fr_1.3fr_auto] sm:items-center sm:gap-3"
+                              class="flex cursor-pointer flex-col gap-1 sm:grid sm:grid-cols-[1.1fr_1.3fr_7rem_minmax(9rem,1fr)] sm:items-center sm:gap-3"
                               (click)="openOrder(order)"
                             >
                               <div class="flex items-center justify-between gap-2 sm:block">
@@ -658,7 +829,10 @@
                                 @if (order.clientCode) {
                                   <span
                                     class="text-slate-700 hover:text-teal-700 hover:underline"
-                                    [title]="'Vedi gli ordini di ' + (order.customerName || order.clientCode)"
+                                    [title]="
+                                      'Vedi gli ordini di ' +
+                                      (order.customerName || order.clientCode)
+                                    "
                                     (click)="openCustomer(order, $event)"
                                     >{{ order.customerName || order.clientCode }}</span
                                   >
@@ -669,12 +843,19 @@
                               <div class="flex items-center justify-between gap-2 sm:block">
                                 <span
                                   class="text-xs font-medium uppercase tracking-wide text-slate-400 sm:hidden"
-                                  >Stato</span
+                                  >Pagamento</span
                                 >
                                 <p-tag
                                   [severity]="paymentStatusSeverity(order.paymentStatus)"
                                   [value]="paymentStatusLabel(order.paymentStatus)"
                                 />
+                              </div>
+                              <div class="flex items-center justify-between gap-2 sm:block">
+                                <span
+                                  class="text-xs font-medium uppercase tracking-wide text-slate-400 sm:hidden"
+                                  >Fatturazione</span
+                                >
+                                <p-tag severity="secondary" value="Non fatturabile" />
                               </div>
                             </div>
                           </div>
