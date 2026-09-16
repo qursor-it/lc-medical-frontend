@@ -57,24 +57,19 @@ describe('AgentsPage agent invoicing controls', () => {
 
   afterEach(() => localStorage.removeItem(storageKey));
 
-  it('deduplicates the same order when selecting all months for an agent', () => {
-    const repeatedOrder = paidOrder(44);
-    const row = agentRow([
-      month('2026-01', [repeatedOrder]),
-      month('2026-02', [{ ...repeatedOrder }]),
-    ]);
+  it('selects an individual paid order for invoicing', () => {
+    const order = paidOrder(44);
 
-    page.toggleAgentSelection(row, new Event('change'));
+    page.toggleOrderSelection(order, new Event('change'));
 
     expect(Array.from(page.selectedOrderIds())).toEqual([44]);
-    expect(page.isAgentFullySelected(row)).toBeTrue();
+    expect(page.isOrderSelected(order)).toBeTrue();
   });
 
   it('does not make unpaid orders selectable and labels them as non-invoiceable', () => {
     const unpaid = paidOrder(45, 'UNPAID');
-    const row = agentRow([month('2026-03', [unpaid])]);
 
-    expect(page.selectableOrderIds(row)).toEqual([]);
+    expect(page.canManageInvoicing(unpaid)).toBeFalse();
     expect(page.invoicingStatusLabel(unpaid)).toBe('Non fatturabile');
   });
 

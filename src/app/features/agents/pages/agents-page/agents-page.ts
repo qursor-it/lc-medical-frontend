@@ -305,54 +305,6 @@ export class AgentsPage implements OnInit {
     return order.orderId != null && this.selectedOrderIds().has(order.orderId);
   }
 
-  protected selectableOrderIds(row: AgentCommissionSummary): number[] {
-    const ids = new Set<number>();
-    for (const month of row.months) {
-      for (const order of month.orders) {
-        if (this.canManageInvoicing(order) && order.orderId != null) {
-          ids.add(order.orderId);
-        }
-      }
-    }
-    return Array.from(ids);
-  }
-
-  protected hasSelectableOrders(row: AgentCommissionSummary): boolean {
-    return this.selectableOrderIds(row).length > 0;
-  }
-
-  protected isAgentFullySelected(row: AgentCommissionSummary): boolean {
-    const ids = this.selectableOrderIds(row);
-    return ids.length > 0 && ids.every((id) => this.selectedOrderIds().has(id));
-  }
-
-  protected isAgentPartiallySelected(row: AgentCommissionSummary): boolean {
-    const ids = this.selectableOrderIds(row);
-    const selectedCount = ids.filter((id) => this.selectedOrderIds().has(id)).length;
-    return selectedCount > 0 && selectedCount < ids.length;
-  }
-
-  protected agentSelectionId(row: AgentCommissionSummary): string {
-    const key = this.agentKey(row).replace(/[^a-zA-Z0-9_-]/g, '-');
-    return `agent-selection-${key}`;
-  }
-
-  protected toggleAgentSelection(row: AgentCommissionSummary, event: Event): void {
-    event.stopPropagation();
-    const ids = this.selectableOrderIds(row);
-    if (ids.length === 0) {
-      return;
-    }
-
-    const next = new Set(this.selectedOrderIds());
-    if (ids.every((id) => next.has(id))) {
-      ids.forEach((id) => next.delete(id));
-    } else {
-      ids.forEach((id) => next.add(id));
-    }
-    this.selectedOrderIds.set(next);
-  }
-
   protected clearSelection(): void {
     this.selectedOrderIds.set(new Set());
   }

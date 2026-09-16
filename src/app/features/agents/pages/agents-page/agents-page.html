@@ -509,25 +509,6 @@
                     }
                   </div>
                 </div>
-                @if (isAdmin() && hasSelectableOrders(row)) {
-                  <div
-                    class="flex shrink-0 items-center gap-2 rounded-md px-1 py-1 text-xs font-semibold text-teal-800 hover:bg-teal-50"
-                    (click)="$event.stopPropagation()"
-                  >
-                    <input
-                      type="checkbox"
-                      class="h-4 w-4 cursor-pointer rounded border-slate-300 accent-teal-700 focus:outline-none focus:ring-2 focus:ring-teal-600 focus:ring-offset-2"
-                      [id]="agentSelectionId(row)"
-                      [checked]="isAgentFullySelected(row)"
-                      [indeterminate]="isAgentPartiallySelected(row)"
-                      [attr.aria-label]="'Seleziona tutti gli ordini pagati di ' + row.agentName"
-                      (change)="toggleAgentSelection(row, $event)"
-                    />
-                    <label class="cursor-pointer whitespace-nowrap" [for]="agentSelectionId(row)">
-                      {{ isAgentFullySelected(row) ? 'Deseleziona tutti' : 'Seleziona tutti' }}
-                    </label>
-                  </div>
-                }
               </div>
             </td>
             <td data-label="Ordini" class="text-right tabular-nums text-slate-900">
@@ -590,7 +571,7 @@
                         <div
                           class="hidden sm:grid sm:grid-cols-[2rem_minmax(0,1.1fr)_minmax(0,1.3fr)_7rem_7rem_7rem_minmax(10rem,1fr)] sm:items-center sm:gap-3 sm:px-2 sm:pb-1.5 sm:text-xs sm:font-medium sm:uppercase sm:tracking-wide sm:text-slate-400"
                         >
-                          <span>Seleziona</span>
+                          <span></span>
                           <span>Ordine</span>
                           <span>Cliente</span>
                           <span class="text-right">Incassato</span>
@@ -609,13 +590,9 @@
                                 (click)="openOrder(order)"
                               >
                                 <div
-                                  class="flex items-center justify-between gap-2 sm:block"
+                                  class="hidden sm:flex sm:items-center sm:justify-center"
                                   (click)="$event.stopPropagation()"
                                 >
-                                  <span
-                                    class="text-xs font-medium uppercase tracking-wide text-slate-400 sm:hidden"
-                                    >Seleziona</span
-                                  >
                                   @if (canManageInvoicing(order)) {
                                     <input
                                       type="checkbox"
@@ -624,8 +601,6 @@
                                       [attr.aria-label]="'Seleziona ordine ' + order.orderNumber"
                                       (change)="toggleOrderSelection(order, $event)"
                                     />
-                                  } @else {
-                                    <span class="text-slate-300" aria-hidden="true">—</span>
                                   }
                                 </div>
                                 <div class="flex items-center justify-between gap-2 sm:block">
