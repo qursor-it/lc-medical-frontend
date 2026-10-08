@@ -6,10 +6,8 @@ export interface BatchUploadResult<T = Record<string, unknown>> {
   item: T | null;
   error: string | null;
   /** Codice macchina dell'errore (es. file protetto), per mostrare un aiuto dedicato. */
-  errorCode?: UploadErrorCode | null;
+  errorCode?: string | null;
 }
-
-export type UploadErrorCode = 'XLSX_SENSITIVITY_LABEL' | 'XLSX_PASSWORD_PROTECTED';
 
 export interface PaidOrderItemsImportResult {
   [key: string]: unknown;
@@ -31,7 +29,7 @@ export interface UploadQueueItem<T = Record<string, unknown>> {
   status: UploadQueueStatus;
   result: BatchUploadResult<T> | null;
   error: string | null;
-  errorCode?: UploadErrorCode | null;
+  errorCode?: string | null;
 }
 
 export interface UploadPanelConfig {

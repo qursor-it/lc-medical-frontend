@@ -1,14 +1,11 @@
-import { Component, input, output, signal } from '@angular/core';
+import { Component, computed, input, output, signal } from '@angular/core';
 import { ButtonModule } from 'primeng/button';
 import { Popover, PopoverModule } from 'primeng/popover';
 import { TableModule } from 'primeng/table';
 import { TagModule } from 'primeng/tag';
 
-import {
-  UploadErrorCode,
-  UploadQueueItem,
-  UploadQueueStatus,
-} from '../../../core/models/upload.models';
+import { UploadQueueItem, UploadQueueStatus } from '../../../core/models/upload.models';
+import { uploadErrorHelp } from '../../../core/upload-error-help';
 
 type TagSeverity = 'success' | 'secondary' | 'info' | 'warn' | 'danger' | 'contrast';
 
@@ -24,13 +21,21 @@ export class UploadResultsTable {
   readonly clearRequested = output<void>();
   readonly uploadRequested = output<void>();
 
-  protected readonly helpCode = signal<UploadErrorCode | null>(null);
+  private readonly helpCode = signal<string | null>(null);
+  protected readonly helpContent = computed(() => {
+    const code = this.helpCode();
+    return code ? (uploadErrorHelp[code] ?? null) : null;
+  });
 
   protected hasFiles(): boolean {
     return this.items().length > 0;
   }
 
-  protected showHelp(event: Event, code: UploadErrorCode, popover: Popover): void {
+  protected hasHelp(code: string | null | undefined): boolean {
+    return !!code && Object.hasOwn(uploadErrorHelp, code);
+  }
+
+  protected showHelp(event: Event, code: string, popover: Popover): void {
     this.helpCode.set(code);
     popover.toggle(event);
   }

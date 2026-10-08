@@ -35,7 +35,7 @@
               >
                 {{ documentDetail(item) }}
               </span>
-              @if (item.errorCode) {
+              @if (hasHelp(item.errorCode)) {
                 <button
                   type="button"
                   class="inline-flex shrink-0 items-center gap-1 text-xs font-semibold text-emerald-700 transition hover:text-emerald-900"
@@ -79,58 +79,25 @@
 </section>
 
 <p-popover #help>
-  <div class="max-w-md space-y-3 p-1 text-sm text-slate-700">
-    @if (helpCode() === 'XLSX_SENSITIVITY_LABEL') {
-      <p class="font-semibold text-slate-900">
-        File protetto da Microsoft (etichetta di riservatezza)
-      </p>
-      <p>
-        Il file è crittografato con la protezione Microsoft Purview: si apre solo nel tuo Excel,
-        dopo l'accesso con il PIN o il codice ricevuto. Non c'è una password che il sistema possa
-        usare, quindi va creata una copia non protetta.
-      </p>
+  @if (helpContent(); as content) {
+    <div
+      class="max-w-md space-y-3 p-1 text-sm text-slate-700 [&_kbd]:rounded [&_kbd]:border [&_kbd]:border-slate-300 [&_kbd]:bg-slate-50 [&_kbd]:px-1 [&_kbd]:text-xs"
+    >
+      <p class="font-semibold text-slate-900">{{ content.title }}</p>
+      @if (content.intro) {
+        <p [innerHTML]="content.intro"></p>
+      }
       <ol class="list-decimal space-y-1.5 pl-5">
-        <li>
-          Apri il file in <strong>Excel sul computer</strong>, inserendo il PIN come fai di solito.
-        </li>
-        <li>
-          Vai sul foglio con i dati, clicca sulla cella <strong>A1</strong> e premi
-          <kbd class="rounded border border-slate-300 bg-slate-50 px-1 text-xs">Ctrl+A</kbd>
-          (<kbd class="rounded border border-slate-300 bg-slate-50 px-1 text-xs">Cmd+A</kbd> su
-          Mac), poi copia con
-          <kbd class="rounded border border-slate-300 bg-slate-50 px-1 text-xs">Ctrl+C</kbd>.
-        </li>
-        <li>
-          Crea una nuova cartella di lavoro:
-          <strong>File → Nuovo → Cartella di lavoro vuota</strong>.
-        </li>
-        <li>
-          Clicca sulla cella <strong>A1</strong> e scegli
-          <strong>Home → Incolla → Valori e formattazione numeri</strong> (mantiene le date senza
-          portarsi dietro formule e protezione).
-        </li>
-        <li>
-          <strong>File → Salva con nome</strong> come "Cartella di lavoro di Excel (.xlsx)" e carica
-          qui il nuovo file.
-        </li>
+        @for (step of content.steps; track $index) {
+          <li [innerHTML]="step"></li>
+        }
       </ol>
-      <p class="rounded-md border border-amber-200 bg-amber-50 p-2 text-xs text-amber-800">
-        Se Excel non ti permette di copiare, la protezione lo vieta: chiedi al mittente di inviarti
-        il file senza etichetta di riservatezza crittografata.
-      </p>
-    } @else if (helpCode() === 'XLSX_PASSWORD_PROTECTED') {
-      <p class="font-semibold text-slate-900">File protetto da password</p>
-      <ol class="list-decimal space-y-1.5 pl-5">
-        <li>Apri il file in Excel inserendo la password.</li>
-        <li>
-          Vai su
-          <strong
-            >File → Informazioni → Proteggi cartella di lavoro → Crittografa con password</strong
-          >.
-        </li>
-        <li>Cancella la password nel campo e premi <strong>OK</strong>.</li>
-        <li>Salva il file e caricalo di nuovo qui.</li>
-      </ol>
-    }
-  </div>
+      @if (content.note) {
+        <p
+          class="rounded-md border border-amber-200 bg-amber-50 p-2 text-xs text-amber-800"
+          [innerHTML]="content.note"
+        ></p>
+      }
+    </div>
+  }
 </p-popover>
