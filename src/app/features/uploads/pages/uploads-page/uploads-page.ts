@@ -97,7 +97,9 @@ export class UploadsPage {
 
     this.uploading.set(true);
     this.uploadQueue.update((items) =>
-      items.map((item): UploadQueueItem => ({ ...item, status: 'uploading', error: null })),
+      items.map(
+        (item): UploadQueueItem => ({ ...item, status: 'uploading', error: null, errorCode: null }),
+      ),
     );
 
     this.uploadService.reimportPaidOrderItems(file).subscribe({
@@ -152,6 +154,7 @@ export class UploadsPage {
         ...item,
         status: files.some((file) => this.fileKey(file) === item.id) ? 'uploading' : item.status,
         error: null,
+        errorCode: null,
       })),
     );
 
@@ -219,6 +222,7 @@ export class UploadsPage {
           status: result.success ? 'success' : 'failed',
           result,
           error: result.error,
+          errorCode: result.errorCode ?? null,
         };
       }),
     );

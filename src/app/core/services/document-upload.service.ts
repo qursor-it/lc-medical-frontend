@@ -2,7 +2,12 @@ import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { catchError, forkJoin, map, Observable, of } from 'rxjs';
 
-import { BatchUploadResult, PaidOrderItemsImportResult, UploadKind } from '../models/upload.models';
+import {
+  BatchUploadResult,
+  PaidOrderItemsImportResult,
+  UploadErrorCode,
+  UploadKind,
+} from '../models/upload.models';
 import { environment } from '../../../environments/environment';
 
 @Injectable({ providedIn: 'root' })
@@ -57,6 +62,7 @@ export class DocumentUploadService {
           success: true,
           item: result,
           error: null,
+          errorCode: null,
         })),
         catchError((error: HttpErrorResponse) =>
           of({
@@ -64,9 +70,15 @@ export class DocumentUploadService {
             success: false,
             item: null,
             error: this.errorMessage(error),
+            errorCode: this.errorCode(error),
           }),
         ),
       );
+  }
+
+  private errorCode(error: HttpErrorResponse): UploadErrorCode | null {
+    const code: unknown = error.error?.code;
+    return code === 'XLSX_SENSITIVITY_LABEL' || code === 'XLSX_PASSWORD_PROTECTED' ? code : null;
   }
 
   private errorMessage(error: HttpErrorResponse): string {

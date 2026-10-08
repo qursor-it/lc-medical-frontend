@@ -1,15 +1,20 @@
-import { Component, input, output } from '@angular/core';
+import { Component, input, output, signal } from '@angular/core';
 import { ButtonModule } from 'primeng/button';
+import { Popover, PopoverModule } from 'primeng/popover';
 import { TableModule } from 'primeng/table';
 import { TagModule } from 'primeng/tag';
 
-import { UploadQueueItem, UploadQueueStatus } from '../../../core/models/upload.models';
+import {
+  UploadErrorCode,
+  UploadQueueItem,
+  UploadQueueStatus,
+} from '../../../core/models/upload.models';
 
 type TagSeverity = 'success' | 'secondary' | 'info' | 'warn' | 'danger' | 'contrast';
 
 @Component({
   selector: 'app-upload-results-table',
-  imports: [ButtonModule, TableModule, TagModule],
+  imports: [ButtonModule, PopoverModule, TableModule, TagModule],
   templateUrl: './upload-results-table.html',
 })
 export class UploadResultsTable {
@@ -19,8 +24,15 @@ export class UploadResultsTable {
   readonly clearRequested = output<void>();
   readonly uploadRequested = output<void>();
 
+  protected readonly helpCode = signal<UploadErrorCode | null>(null);
+
   protected hasFiles(): boolean {
     return this.items().length > 0;
+  }
+
+  protected showHelp(event: Event, code: UploadErrorCode, popover: Popover): void {
+    this.helpCode.set(code);
+    popover.toggle(event);
   }
 
   protected statusLabel(status: UploadQueueStatus): string {
